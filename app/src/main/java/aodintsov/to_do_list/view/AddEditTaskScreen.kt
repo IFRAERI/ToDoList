@@ -12,7 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,9 +30,9 @@ fun AddEditTaskScreen(
     modifier: Modifier = Modifier
 ) {
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
-    var taskTitle by remember { mutableStateOf("") }
-    var taskDescription by remember { mutableStateOf("") }
-    var taskLoaded by remember { mutableStateOf(false) }
+    var taskTitle by rememberSaveable { mutableStateOf("") }
+    var taskDescription by rememberSaveable { mutableStateOf("") }
+    var taskLoaded by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(taskId) {
         Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")

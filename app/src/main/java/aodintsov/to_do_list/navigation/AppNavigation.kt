@@ -40,7 +40,6 @@ fun AppNavigation(
             )
         }
         composable("addEditTask") {
-            Log.d("AppNavigation", "Navigating to addEditTask without taskId")
             AddEditTaskScreen(
                 navController = navController,
                 taskId = null,
