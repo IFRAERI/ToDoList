@@ -1,9 +1,17 @@
 package aodintsov.to_do_list.view
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -55,8 +63,18 @@ fun AddEditTaskScreen(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+
+
+    ) {
         Text(text = "Add/Edit Task")
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = taskTitle,
@@ -72,30 +90,37 @@ fun AddEditTaskScreen(
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        Button(
-            onClick = {
-                if (taskId == null) {
-                    taskViewModel.addTask(Task(taskId = System.currentTimeMillis().toString(), title = taskTitle, description = taskDescription, userId = "yourUserId"))
-                } else {
-                    val updatedTask = Task(taskId = taskId, title = taskTitle, description = taskDescription, userId = "yourUserId")
-                    taskViewModel.updateTask(updatedTask)
-                }
-                navController.navigateUp()
-            },
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Text(text = "Save Task")
-        }
+        Spacer(modifier = Modifier.weight(1f))
 
-        if (taskId != null) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Button(
                 onClick = {
-                    taskViewModel.deleteTask(taskId, "yourUserId")
+                    if (taskId == null) {
+                        taskViewModel.addTask(Task(taskId = System.currentTimeMillis().toString(), title = taskTitle, description = taskDescription, userId = "yourUserId"))
+                    } else {
+                        val updatedTask = Task(taskId = taskId, title = taskTitle, description = taskDescription, userId = "yourUserId")
+                        taskViewModel.updateTask(updatedTask)
+                    }
                     navController.navigateUp()
                 },
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.weight(1f)
             ) {
-                Text(text = "Delete Task")
+                Text(text = "Save Task")
+            }
+
+            if (taskId != null) {
+                Button(
+                    onClick = {
+                        taskViewModel.deleteTask(taskId, "yourUserId")
+                        navController.navigateUp()
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = "Delete Task")
+                }
             }
         }
     }
