@@ -5,13 +5,18 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
@@ -25,6 +30,9 @@ import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun TaskListScreen(
@@ -67,20 +75,38 @@ fun TaskListScreen(
         ) {
             Text(text = "Add Task")
         }
-//        Button(onClick = { taskViewModel.deleteAllTasks() }) {
-//            Text(text = "Delete All Tasks")
-//        }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
-    Column(modifier = Modifier.combinedClickable(
-        onClick = { /* Do nothing on click */ },
-        onLongClick = onLongClick
-    )) {
-        Text(text = task.title)
-        Text(text = task.description)
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .height(250.dp)
+        .padding(vertical = 8.dp)
+        .combinedClickable(
+            onClick = { /* Do nothing on click */ },
+            onLongClick = onLongClick
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = task.title)
+            Text(
+                text = task.description,
+                maxLines = 4 // Limit description to 4 lines
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = task.completed,
+                    onCheckedChange = null // Task completion state is read-only in this context
+                )
+                Text(text = "Completed")
+            }
+            task.dueDate?.let {
+                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(it))
+                Text(text = "Deadline: $formattedDate")
+            }
+        }
     }
 }

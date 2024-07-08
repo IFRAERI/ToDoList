@@ -57,12 +57,15 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.runtime.livedata)
-    implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.runtime.livedata)
+    //implementation(libs.androidx.runtime.livedata)
+    //implementation(libs.androidx.navigation.runtime.ktx)
+    //implementation(libs.androidx.navigation.compose)
+    //implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,12 +73,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     // Add the dependency for the Firebase Authentication library
     implementation("com.google.firebase:firebase-auth")
-    // Also add the dependency for the Google Play services library and specify its version
+    // Also add the dependency for the Google Play services Library and specify its version
     implementation("com.google.android.gms:play-services-auth:21.2.0")
-    // Add the dependency for the Firebase Firestore library
-    implementation("com.google.firebase:firebase-firestore-ktx")
+    // Add the dependency for the Firebase Firestore Library
+    implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
 }

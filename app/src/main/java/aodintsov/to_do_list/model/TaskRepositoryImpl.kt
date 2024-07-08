@@ -61,28 +61,107 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
             }
     }
 
-    override fun deleteAllTasks(onSuccess: () -> Unit, onFailure: (Throwable) -> Unit) {
-        try {
-            val collection = firestore.collection("tasks")
-            collection.get().addOnSuccessListener { snapshot ->
+    override fun deleteAllTasks(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        firestore.collection("tasks")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
                 val batch = firestore.batch()
                 for (doc in snapshot.documents) {
                     batch.delete(doc.reference)
                 }
-                batch.commit().addOnSuccessListener {
-                    Log.d("TaskRepositoryImpl", "All tasks deleted")
-                    onSuccess()
-                }.addOnFailureListener { exception ->
-                    Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
-                    onFailure(exception)
-                }
-            }.addOnFailureListener { exception ->
+                batch.commit()
+                    .addOnSuccessListener {
+                        Log.d("TaskRepositoryImpl", "All tasks deleted for user: $userId")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
+                        onFailure(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
                 Log.e("TaskRepositoryImpl", "Error fetching tasks for deletion", exception)
                 onFailure(exception)
             }
-        } catch (e: Exception) {
-            Log.e("TaskRepositoryImpl", "Exception in deleteAllTasks", e)
-            onFailure(e)
-        }
+    }
+
+    override fun getAssignedTasks(userId: String, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit) {
+        firestore.collection("tasks")
+            .whereEqualTo("assignedTo", userId)
+            .get()
+            .addOnSuccessListener { result ->
+                val tasks = result.map { document -> document.toObject<Task>().apply { taskId = document.id } }
+                onSuccess(tasks)
+                Log.d("TaskRepositoryImpl", "Assigned tasks fetched successfully: $tasks")
+            }
+            .addOnFailureListener { exception ->
+                Log.e("TaskRepositoryImpl", "Error fetching assigned tasks", exception)
+                onFailure(exception)
+            }
+    }
+
+    override fun updateSubTask(taskId: String, subTask: SubTask, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        firestore.collection("tasks")
+            .document(taskId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val task = document.toObject(Task::class.java)
+                    if (task != null) {
+                        val updatedSubTasks = task.subTasks.toMutableList()
+                        val index = updatedSubTasks.indexOfFirst { it.subTaskId == subTask.subTaskId }
+                        if (index != -1) {
+                            updatedSubTasks[index] = subTask
+                        } else {
+                            updatedSubTasks.add(subTask)
+                        }
+                        task.subTasks = updatedSubTasks
+                        firestore.collection("tasks")
+                            .document(taskId)
+                            .set(task)
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { exception ->
+                                onFailure(exception)
+                            }
+                    } else {
+                        onFailure(Exception("Task not found"))
+                    }
+                } else {
+                    onFailure(Exception("Task not found"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+            }
+    }
+
+    override fun assignTaskToUser(taskId: String, assignedTo: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        firestore.collection("tasks")
+            .document(taskId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val task = document.toObject(Task::class.java)
+                    if (task != null) {
+                        task.assignedTo = assignedTo
+                        task.delegatedBy = task.userId
+                        firestore.collection("tasks")
+                            .document(taskId)
+                            .set(task)
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { exception ->
+                                onFailure(exception)
+                            }
+                    } else {
+                        onFailure(Exception("Task not found"))
+                    }
+                } else {
+                    onFailure(Exception("Task not found"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+            }
     }
 }

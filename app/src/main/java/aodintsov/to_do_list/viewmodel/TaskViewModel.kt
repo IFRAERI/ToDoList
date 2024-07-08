@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.model.TaskRepository
 import kotlinx.coroutines.launch
@@ -35,9 +36,9 @@ class TaskViewModel(
         }
     }
 
-    fun deleteAllTasks() {
+    fun deleteAllTasks(userId: String) {
         viewModelScope.launch {
-            repository.deleteAllTasks(onSuccess = {
+            repository.deleteAllTasks(userId, onSuccess = {
                 _tasks.value = emptyList()
                 savedStateHandle.set("tasks", emptyList<Task>())
             }, onFailure = {
@@ -84,5 +85,43 @@ class TaskViewModel(
         val task = _tasks.value?.find { it.taskId == taskId }
         Log.d("TaskViewModel", "getTaskById($taskId): $task")
         return task
+    }
+
+    fun assignTaskToUser(taskId: String, assignedTo: String) {
+        viewModelScope.launch {
+            repository.assignTaskToUser(taskId, assignedTo, onSuccess = {
+                // Refresh tasks to reflect assignment
+                fetchTasks(assignedTo)
+            }, onFailure = {
+                // Handle error
+            })
+        }
+    }
+
+    fun updateSubTask(taskId: String, subTask: SubTask) {
+        viewModelScope.launch {
+            repository.updateSubTask(taskId, subTask, onSuccess = {
+                // Refresh tasks to reflect sub-task update
+                val task = getTaskById(taskId)
+                task?.let {
+                    fetchTasks(it.userId)
+                }
+            }, onFailure = {
+                // Handle error
+            })
+        }
+    }
+
+    fun getAssignedTasks(userId: String) {
+        viewModelScope.launch {
+            repository.getAssignedTasks(userId, onSuccess = { taskList ->
+                _tasks.value = taskList
+                Log.d("TaskViewModel", "Fetched assigned tasks: ${taskList.map { it.taskId }}")
+                savedStateHandle.set("tasks", taskList)
+            }, onFailure = {
+                _tasks.value = emptyList() // Set empty list on failure
+                Log.d("TaskViewModel", "Failed to fetch assigned tasks")
+            })
+        }
     }
 }
