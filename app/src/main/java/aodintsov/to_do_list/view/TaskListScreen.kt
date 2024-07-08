@@ -53,12 +53,12 @@ fun TaskListScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = modifier.fillMaxHeight().padding(16.dp)) {
+        Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
             Text(text = "Task List")
             if (tasks.value.isEmpty()) {
                 Text(text = "No tasks available.")
             } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
+                LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
                     items(tasks.value) { task ->
                         TaskItem(task = task) {
                             Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
@@ -67,13 +67,13 @@ fun TaskListScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-        }
-        Button(
-            onClick = { navController.navigate("addEditTask") },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
-        ) {
-            Text(text = "Add Task")
+            Spacer(modifier = Modifier)
+            Button(
+                onClick = { navController.navigate("addEditTask") },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+           ) {
+                Text(text = "Add Task")
+            }
         }
     }
 }
@@ -83,7 +83,7 @@ fun TaskListScreen(
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
     Card(modifier = Modifier
         .fillMaxWidth()
-        .height(250.dp)
+        // .height(250.dp)
         .padding(vertical = 8.dp)
         .combinedClickable(
             onClick = { /* Do nothing on click */ },
