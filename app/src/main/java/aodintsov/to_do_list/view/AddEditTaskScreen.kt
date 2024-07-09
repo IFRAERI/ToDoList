@@ -13,12 +13,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -129,7 +125,11 @@ fun AddEditTaskScreen(
         ) {
             Checkbox(
                 checked = isCompleted,
-                onCheckedChange = { isCompleted = it }
+                onCheckedChange = {
+                    if (subTasks.all { it.completed } || subTasks.isEmpty()) {
+                        isCompleted = it
+                    }
+                }
             )
             Text(text = "Completed")
         }
@@ -167,13 +167,14 @@ fun AddEditTaskScreen(
                         .padding(vertical = 4.dp)
                         .weight(1f)
                 )
-                IconButton(onClick = {
-                    subTasks = subTasks.toMutableList().apply {
-                        removeAt(index)
+                Checkbox(
+                    checked = subTask.completed,
+                    onCheckedChange = {
+                        subTasks = subTasks.toMutableList().apply {
+                            set(index, subTask.copy(completed = it))
+                        }
                     }
-                }) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Remove subtask")
-                }
+                )
             }
         }
         Button(onClick = {
