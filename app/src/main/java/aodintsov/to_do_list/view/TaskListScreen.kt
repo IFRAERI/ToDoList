@@ -47,22 +47,23 @@ fun TaskListScreen(
         Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
             Text(text = "Task List")
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    taskViewModel.searchTasks(it)
-                },
-                label = { Text("Search") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+
+                //  Spacer(modifier = Modifier.height(8.dp))
             Row {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                        taskViewModel.searchTasks(it)
+                    },
+                    label = { Text("Search") },
+                //    modifier = Modifier.fillMaxWidth()
+                )
                 Button(
                     onClick = { taskViewModel.sortTasksByDate() },
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                  //  modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    Text(text = "Sort by Date")
+                    Text(text = "Sort")
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
