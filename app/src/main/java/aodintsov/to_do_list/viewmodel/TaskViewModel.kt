@@ -36,6 +36,19 @@ class TaskViewModel(
         }
     }
 
+    fun searchTasks(query: String) {
+        val filteredTasks = _tasks.value?.filter { task ->
+            task.title.contains(query, ignoreCase = true) ||
+                    task.description.contains(query, ignoreCase = true)
+        } ?: emptyList()
+        _tasks.value = filteredTasks
+    }
+
+    fun sortTasksByDate() {
+        val sortedTasks = _tasks.value?.sortedBy { it.dueDate } ?: emptyList()
+        _tasks.value = sortedTasks
+    }
+
     fun deleteAllTasks(userId: String) {
         viewModelScope.launch {
             repository.deleteAllTasks(userId, onSuccess = {

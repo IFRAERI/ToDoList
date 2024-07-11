@@ -3,23 +3,13 @@ package aodintsov.to_do_list.view
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,8 +21,7 @@ import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 @Composable
 fun TaskListScreen(
@@ -52,10 +41,34 @@ fun TaskListScreen(
         Log.d("TaskListScreen", "Task ID: ${task.taskId}")
     }
 
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
             Text(text = "Task List")
-            if (tasks.value.isEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            TextField(
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                    taskViewModel.searchTasks(it)
+                },
+                label = { Text("Search") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row {
+                Button(
+                    onClick = { taskViewModel.sortTasksByDate() },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Text(text = "Sort by Date")
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            if (searchQuery.isNotEmpty()){
+                Text(text = "No tasks found")}
+            else  if (tasks.value.isEmpty()) {
                 Text(text = "No tasks available.")
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
@@ -71,7 +84,7 @@ fun TaskListScreen(
             Button(
                 onClick = { navController.navigate("addEditTask") },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-           ) {
+            ) {
                 Text(text = "Add Task")
             }
         }

@@ -50,8 +50,8 @@ fun AddEditTaskScreen(
     var taskLoaded by rememberSaveable { mutableStateOf(false) }
     var isCompleted by rememberSaveable { mutableStateOf(false) }
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
-    var assignedTo by rememberSaveable { mutableStateOf("") } // New field for delegation
-    var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) } // New field for subtasks
+    var assignedTo by rememberSaveable { mutableStateOf("") }
+    var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
 
     LaunchedEffect(taskId) {
         Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")
