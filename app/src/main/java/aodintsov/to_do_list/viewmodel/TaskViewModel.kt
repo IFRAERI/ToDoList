@@ -17,18 +17,22 @@ class TaskViewModel(
 ) : ViewModel() {
     private val _tasks = MutableLiveData<List<Task>>()
     val tasks: LiveData<List<Task>> = _tasks
+    private var allTasks: List<Task> = listOf()
 
     init {
         // Restore state
         _tasks.value = savedStateHandle.get("tasks") ?: emptyList()
+        allTasks = _tasks.value ?: emptyList()
+        Log.d("TaskViewModel", "Initial allTasks: $allTasks")
     }
 
     fun fetchTasks(userId: String) {
         viewModelScope.launch {
             repository.getTasks(userId, onSuccess = { taskList ->
+                allTasks = taskList
                 _tasks.value = taskList
                 Log.d("TaskViewModel", "Fetched tasks: ${taskList.map { it.taskId }}")
-                //Log.d("TaskViewModel", "User ID: ${userId.toString()}")
+                Log.d("TaskViewModel", "All tasks after fetch: $allTasks")
                 savedStateHandle.set("tasks", taskList)
             }, onFailure = {
                 _tasks.value = emptyList() // Set empty list on failure
@@ -38,11 +42,21 @@ class TaskViewModel(
     }
 
     fun searchTasks(query: String) {
-        val filteredTasks = _tasks.value?.filter { task ->
-            task.title.contains(query, ignoreCase = true) ||
-                    task.description.contains(query, ignoreCase = true)
-        } ?: emptyList()
+        Log.d("TaskViewModel", "searchTasks called with query: $query")
+        Log.d("TaskViewModel", "All tasks before filtering: $allTasks")
+
+        val filteredTasks = if (query.isEmpty()) {
+            allTasks
+        } else {
+            allTasks.filter { task ->
+                task.title.contains(query, ignoreCase = true) ||
+                        task.description.contains(query, ignoreCase = true)
+            }
+        }
+
+        Log.d("TaskViewModel", "Filtered tasks before setting: $filteredTasks")
         _tasks.value = filteredTasks
+        Log.d("TaskViewModel", "Filtered tasks after setting: ${_tasks.value}")
     }
 
     fun sortTasksByDate() {
@@ -54,7 +68,9 @@ class TaskViewModel(
         viewModelScope.launch {
             repository.deleteAllTasks(userId, onSuccess = {
                 _tasks.value = emptyList()
+                allTasks = emptyList()
                 savedStateHandle.set("tasks", emptyList<Task>())
+                Log.d("TaskViewModel", "All tasks after delete: $allTasks")
             }, onFailure = {
                 // Handle error
             })
@@ -131,6 +147,7 @@ class TaskViewModel(
     fun getAssignedTasks(userId: String) {
         viewModelScope.launch {
             repository.getAssignedTasks(userId, onSuccess = { taskList ->
+                allTasks = taskList
                 _tasks.value = taskList
                 Log.d("TaskViewModel", "Fetched assigned tasks: ${taskList.map { it.taskId }}")
                 savedStateHandle.set("tasks", taskList)

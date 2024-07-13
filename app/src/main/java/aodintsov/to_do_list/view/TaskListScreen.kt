@@ -7,10 +7,12 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +27,7 @@ import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
     navController: NavController,
@@ -34,63 +37,93 @@ fun TaskListScreen(
     modifier: Modifier = Modifier
 ) {
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
-    val tasks = taskViewModel.tasks.observeAsState(emptyList())
+    val tasks by taskViewModel.tasks.observeAsState(emptyList())
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
-    val currentUserId = authViewModel.getCurrentUserId() ?: userId
-    taskViewModel.fetchTasks(currentUserId)
-    tasks.value.forEach { task ->
-        Log.d("TaskListScreen", "Task ID: ${task.taskId}")
+    LaunchedEffect(Unit) {
+        val currentUserId = authViewModel.getCurrentUserId() ?: userId
+        taskViewModel.fetchTasks(currentUserId)
     }
 
-    var searchQuery by rememberSaveable { mutableStateOf("") }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text("Task List") },
+                actions = {
+                    var searchQuery by remember { mutableStateOf("") }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-            Text(text = "Task List")
-            Spacer(modifier = Modifier.height(8.dp))
-
-                //  Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = {
-                        searchQuery = it
-                        taskViewModel.searchTasks(it)
-                    },
-                    label = { Text("Search") },
-                //    modifier = Modifier.fillMaxWidth()
-                )
-                Button(
-                    onClick = { taskViewModel.sortTasksByDate() },
-                  //  modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Text(text = "Sort")
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            taskViewModel.searchTasks(it)
+                        },
+                        label = { Text("Search") },
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    IconButton(onClick = {
+                        taskViewModel.sortTasksByDate()
+                    }) {
+                        Icon(Icons.Default.Sort, contentDescription = "Sort")
+                    }
+                    IconButton(onClick = {
+                        showLogoutDialog = true
+                    }) {
+                        Icon(Icons.Default.Logout, contentDescription = "Logout")
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            if (searchQuery.isNotEmpty()){
-                Text(text = "No tasks found")}
-            else  if (tasks.value.isEmpty()) {
-                Text(text = "No tasks available.")
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
-                    items(tasks.value) { task ->
-                        TaskItem(task = task) {
-                            Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
-                            navController.navigate("addEditTask/${task.taskId}")
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+                if (tasks.isEmpty()) {
+                    Text(text = "No tasks available.")
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
+                        items(tasks) { task ->
+                            TaskItem(task = task) {
+                                Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
+                                navController.navigate("addEditTask/${task.taskId}")
+                            }
                         }
                     }
                 }
-            }
-            Spacer(modifier = Modifier)
-            Button(
-                onClick = { navController.navigate("addEditTask") },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(text = "Add Task")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { navController.navigate("addEditTask") },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(text = "Add Task")
+                }
             }
         }
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Confirm Logout") },
+            text = { Text("Are you sure you want to logout?") },
+            confirmButton = {
+                Button(onClick = {
+                    authViewModel.signOut {  }
+                    navController.navigate("login") {
+                        popUpTo("taskList") { inclusive = true }
+                    }
+                    showLogoutDialog = false
+                }) {
+                    Text("Logout")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -101,7 +134,6 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
     val isOverdue = task.dueDate?.let { it < currentTime && !task.completed } ?: false
     Card(modifier = Modifier
         .fillMaxWidth()
-        // .height(250.dp)
         .padding(vertical = 8.dp)
         .background(if (isOverdue) Color.Red else Color.White)
         .combinedClickable(

@@ -22,4 +22,11 @@ class AuthViewModel(private val firebaseAuth: FirebaseAuth) : ViewModel() {
                 onComplete(task.isSuccessful)
             }
     }
+
+
+
+    fun signOut(onSuccess: () -> Unit) {
+        firebaseAuth.signOut()
+        onSuccess()
+    }
 }
