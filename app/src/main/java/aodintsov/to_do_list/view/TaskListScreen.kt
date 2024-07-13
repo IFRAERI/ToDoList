@@ -2,6 +2,7 @@ package aodintsov.to_do_list.view
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,6 +13,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -95,10 +97,13 @@ fun TaskListScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
+    val currentTime = System.currentTimeMillis()
+    val isOverdue = task.dueDate?.let { it < currentTime && !task.completed } ?: false
     Card(modifier = Modifier
         .fillMaxWidth()
         // .height(250.dp)
         .padding(vertical = 8.dp)
+        .background(if (isOverdue) Color.Red else Color.White)
         .combinedClickable(
             onClick = { /* Do nothing on click */ },
             onLongClick = onLongClick

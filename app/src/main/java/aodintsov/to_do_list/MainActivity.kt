@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
         val repository = TaskRepositoryImpl(firestore)
 
         val taskViewModelFactory = TaskViewModelFactory(repository, createSavedStateHandle())
+        //val authViewModelFactory = AuthViewModelFactory(firebaseAuth)
 
         setContent {
             ToDoListTheme {

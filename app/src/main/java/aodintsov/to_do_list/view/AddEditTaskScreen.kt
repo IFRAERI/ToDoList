@@ -40,6 +40,7 @@ import java.util.Locale
 @Composable
 fun AddEditTaskScreen(
     navController: NavController,
+    userId: String,
     taskId: String?,
     taskViewModelFactory: TaskViewModelFactory,
     modifier: Modifier = Modifier
@@ -201,7 +202,7 @@ fun AddEditTaskScreen(
                                 taskId = System.currentTimeMillis().toString(),
                                 title = taskTitle,
                                 description = taskDescription,
-                                userId = "yourUserId",
+                                userId = userId,
                                 completed = isCompleted,
                                 dueDate = deadline,
                                 assignedTo = assignedTo,
@@ -213,7 +214,7 @@ fun AddEditTaskScreen(
                             taskId = taskId,
                             title = taskTitle,
                             description = taskDescription,
-                            userId = "yourUserId",
+                            userId = userId,
                             completed = isCompleted,
                             dueDate = deadline,
                             assignedTo = assignedTo,
@@ -231,7 +232,7 @@ fun AddEditTaskScreen(
             if (taskId != null) {
                 Button(
                     onClick = {
-                        taskViewModel.deleteTask(taskId, "yourUserId")
+                        taskViewModel.deleteTask(taskId, userId)
                         navController.navigateUp()
                     },
                     modifier = Modifier.weight(1f)

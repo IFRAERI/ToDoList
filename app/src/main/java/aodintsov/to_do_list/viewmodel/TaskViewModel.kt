@@ -28,6 +28,7 @@ class TaskViewModel(
             repository.getTasks(userId, onSuccess = { taskList ->
                 _tasks.value = taskList
                 Log.d("TaskViewModel", "Fetched tasks: ${taskList.map { it.taskId }}")
+                //Log.d("TaskViewModel", "User ID: ${userId.toString()}")
                 savedStateHandle.set("tasks", taskList)
             }, onFailure = {
                 _tasks.value = emptyList() // Set empty list on failure
@@ -65,8 +66,10 @@ class TaskViewModel(
         val newTask = task.copy(taskId = taskId)
         viewModelScope.launch {
             repository.addTask(newTask, onSuccess = {
+                Log.d("TaskViewModel", "Task added successfully: $newTask")
                 fetchTasks(task.userId)
             }, onFailure = {
+                Log.e("TaskViewModel", "Failed to add task", it)
                 // Handle error
             })
         }

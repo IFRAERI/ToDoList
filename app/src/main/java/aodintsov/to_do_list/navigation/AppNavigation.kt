@@ -1,15 +1,13 @@
 package aodintsov.to_do_list.navigation
 
-import android.util.Log
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import aodintsov.to_do_list.view.AddEditTaskScreen
-import aodintsov.to_do_list.view.TaskListScreen
+import aodintsov.to_do_list.view.*
+import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 
@@ -20,21 +18,37 @@ fun AppNavigation(
     authViewModelFactory: AuthViewModelFactory,
     modifier: Modifier = Modifier
 ) {
-    NavHost(navController = navController, startDestination = "taskList") {
+    val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
+    val currentUserId = authViewModel.getCurrentUserId()
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen(
+                navController = navController,
+                authViewModelFactory = authViewModelFactory,
+                modifier = modifier
+            )
+        }
+        composable("register") {
+            RegisterScreen(
+                navController = navController,
+                authViewModelFactory = authViewModelFactory,
+                modifier = modifier
+            )
+        }
         composable("taskList") {
             TaskListScreen(
                 navController = navController,
-                userId = "yourUserId",
+                userId = currentUserId?:"",
                 taskViewModelFactory = taskViewModelFactory,
                 authViewModelFactory = authViewModelFactory,
-                modifier = modifier.padding(1.dp)
+                modifier = modifier
             )
         }
         composable("addEditTask/{taskId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
-            Log.d("AppNavigation", "Navigating to addEditTask with taskId: $taskId")
             AddEditTaskScreen(
                 navController = navController,
+                userId = currentUserId?:"",
                 taskId = taskId,
                 taskViewModelFactory = taskViewModelFactory
             )
@@ -42,6 +56,7 @@ fun AppNavigation(
         composable("addEditTask") {
             AddEditTaskScreen(
                 navController = navController,
+                userId = currentUserId?:"",
                 taskId = null,
                 taskViewModelFactory = taskViewModelFactory
             )
