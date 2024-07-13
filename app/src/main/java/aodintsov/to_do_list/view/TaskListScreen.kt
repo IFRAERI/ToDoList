@@ -7,15 +7,18 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -64,7 +67,9 @@ fun TaskListScreen(
                             taskViewModel.searchTasks(it)
                         },
                         label = { Text("Search") },
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(8.dp))
                     )
                     IconButton(onClick = {
                         taskViewModel.toggleSortOrder()
@@ -90,10 +95,10 @@ fun TaskListScreen(
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
                         items(tasks) { task ->
-                            TaskItem(task = task) {
+                            TaskItem(task = task, onLongClick = {
                                 Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
                                 navController.navigate("addEditTask/${task.taskId}")
-                            }
+                            })
                         }
                     }
                 }
@@ -115,7 +120,7 @@ fun TaskListScreen(
             text = { Text("Are you sure you want to logout?") },
             confirmButton = {
                 Button(onClick = {
-                    authViewModel.signOut {  }
+                    authViewModel.signOut{}
                     navController.navigate("login") {
                         popUpTo("taskList") { inclusive = true }
                     }
@@ -138,17 +143,27 @@ fun TaskListScreen(
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
     val currentTime = System.currentTimeMillis()
     val isOverdue = task.dueDate?.let { it < currentTime && !task.completed } ?: false
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 8.dp)
-        .background(if (isOverdue) Color.Red else Color.White)
-        .combinedClickable(
-            onClick = { /* Do nothing on click */ },
-            onLongClick = onLongClick
-        )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(if (isOverdue) Color.Red else Color.White)
+            .combinedClickable(
+                onClick = { /* Do nothing on click */ },
+                onLongClick = onLongClick
+            )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = task.title)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = task.title, modifier = Modifier.weight(1f))
+                IconButton(onClick = { onLongClick() }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "Edit Task")
+                }
+            }
             Text(
                 text = task.description,
                 maxLines = 4 // Limit description to 4 lines
