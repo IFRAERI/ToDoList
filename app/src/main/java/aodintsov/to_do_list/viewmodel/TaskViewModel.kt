@@ -1,11 +1,7 @@
 package aodintsov.to_do_list.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.model.TaskRepository
@@ -18,6 +14,8 @@ class TaskViewModel(
     private val _tasks = MutableLiveData<List<Task>>()
     val tasks: LiveData<List<Task>> = _tasks
     private var allTasks: List<Task> = listOf()
+    private val _isAscending = MutableLiveData<Boolean>(true)
+    val isAscending: LiveData<Boolean> = _isAscending
 
     init {
         // Restore state
@@ -58,10 +56,24 @@ class TaskViewModel(
         _tasks.value = filteredTasks
         Log.d("TaskViewModel", "Filtered tasks after setting: ${_tasks.value}")
     }
+    fun toggleSortOrder() {
+        _isAscending.value = _isAscending.value?.not()
+        sortTasks()
+    }
 
-    fun sortTasksByDate() {
-        val sortedTasks = _tasks.value?.sortedBy { it.dueDate } ?: emptyList()
-        _tasks.value = sortedTasks
+    private fun sortTasks() {
+        val ascending = _isAscending.value ?: true
+        _tasks.value = if (ascending) {
+            _tasks.value?.sortedBy { it.dueDate }
+        } else {
+            _tasks.value?.sortedByDescending { it.dueDate }
+        }
+    }
+
+    fun loadTasks() {
+        // Load tasks from repository
+        // Example: _tasks.value = repository.getTasks()
+        sortTasks()
     }
 
     fun deleteAllTasks(userId: String) {

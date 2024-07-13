@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -38,6 +39,7 @@ fun TaskListScreen(
 ) {
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     val tasks by taskViewModel.tasks.observeAsState(emptyList())
+    val isAscending by taskViewModel.isAscending.observeAsState(true)
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -52,6 +54,7 @@ fun TaskListScreen(
             TopAppBar(
                 title = { Text("Task List") },
                 actions = {
+
                     var searchQuery by remember { mutableStateOf("") }
 
                     TextField(
@@ -64,9 +67,12 @@ fun TaskListScreen(
                         modifier = Modifier.padding(8.dp)
                     )
                     IconButton(onClick = {
-                        taskViewModel.sortTasksByDate()
+                        taskViewModel.toggleSortOrder()
                     }) {
-                        Icon(Icons.Default.Sort, contentDescription = "Sort")
+                        Icon(
+                            imageVector = if (isAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                            contentDescription = "Sort"
+                        )
                     }
                     IconButton(onClick = {
                         showLogoutDialog = true
