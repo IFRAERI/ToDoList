@@ -20,12 +20,13 @@ fun AppNavigation(
 ) {
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     val currentUserId = authViewModel.getCurrentUserId()
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = if (currentUserId==null)"login" else "taskList") {
         composable("login") {
             LoginScreen(
                 navController = navController,
                 authViewModelFactory = authViewModelFactory,
-                modifier = modifier
+                modifier = modifier,
+               // authViewModel = authViewModel
             )
         }
         composable("register") {

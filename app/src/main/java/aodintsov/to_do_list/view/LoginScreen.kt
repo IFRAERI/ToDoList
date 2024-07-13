@@ -2,6 +2,7 @@ package aodintsov.to_do_list.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,11 +14,13 @@ import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 fun LoginScreen(
     navController: NavController,
     authViewModelFactory: AuthViewModelFactory,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+
 ) {
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
@@ -26,7 +29,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(text = "Login")
-
+        Spacer(modifier = Modifier.height(16.dp))
         TextField(
             value = email,
             onValueChange = { email = it },
@@ -48,8 +51,12 @@ fun LoginScreen(
                 authViewModel.login(email, password) { success ->
                     if (success) {
                         navController.navigate("taskList")
+                        {
+                            popUpTo("login") { inclusive = true }
+                        }
                     } else {
                         // Handle login failure
+                        errorMessage = "Login failed. Please try again."
                     }
                 }
             },
@@ -65,6 +72,10 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Register")
+        }
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = MaterialTheme.colorScheme.error)
         }
     }
 }

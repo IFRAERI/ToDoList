@@ -3,6 +3,7 @@ package aodintsov.to_do_list.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,6 +20,7 @@ fun RegisterScreen(
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
@@ -51,6 +53,7 @@ fun RegisterScreen(
                         navController.navigate("taskList")
                     } else {
                         // Handle registration failure
+                        errorMessage = "Registration failed. Please try again."
                     }
                 }
             },
