@@ -2,6 +2,7 @@ package aodintsov.to_do_list.view
 
 import android.app.DatePickerDialog
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,8 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +42,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskScreen(
     navController: NavController,
@@ -56,7 +62,7 @@ fun AddEditTaskScreen(
 
     LaunchedEffect(taskId) {
         Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")
-        taskViewModel.fetchTasks("yourUserId")
+        taskViewModel.fetchTasks(userId)
     }
 
     val tasks by taskViewModel.tasks.observeAsState()
@@ -98,11 +104,17 @@ fun AddEditTaskScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 0.dp)
+            //.padding(16.dp)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
+            .background(MaterialTheme.colorScheme.background) // Set background color from theme
     ) {
-        Text(text = "Add/Edit Task")
+        Text(
+            text = "Add/Edit Task",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -110,6 +122,11 @@ fun AddEditTaskScreen(
             value = taskTitle,
             onValueChange = { taskTitle = it },
             label = { Text("Title") },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            ),
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
@@ -117,6 +134,11 @@ fun AddEditTaskScreen(
             value = taskDescription,
             onValueChange = { taskDescription = it },
             label = { Text("Description") },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            ),
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
@@ -130,30 +152,30 @@ fun AddEditTaskScreen(
                     if (subTasks.all { it.completed } || subTasks.isEmpty()) {
                         isCompleted = it
                     }
-                }
+                },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    uncheckedColor = MaterialTheme.colorScheme.onSurface
+                )
             )
-            Text(text = "Completed")
+            Text(text = "Completed", color = MaterialTheme.colorScheme.onBackground)
         }
 
         Row(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            Text(text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}")
+            Text(
+                text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}",
+                color = MaterialTheme.colorScheme.onBackground
+            )
             Spacer(modifier = Modifier.weight(1f))
             Button(onClick = { datePickerDialog.show() }) {
                 Text(text = "Set Deadline")
             }
         }
 
-        TextField(
-            value = assignedTo,
-            onValueChange = { assignedTo = it },
-            label = { Text("Assign To") },
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        Text(text = "Subtasks:")
+        Text(text = "Subtasks:", color = MaterialTheme.colorScheme.onBackground)
         subTasks.forEachIndexed { index, subTask ->
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 TextField(
@@ -164,6 +186,11 @@ fun AddEditTaskScreen(
                         }
                     },
                     label = { Text("Subtask ${index + 1}") },
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    ),
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .weight(1f)
@@ -174,7 +201,11 @@ fun AddEditTaskScreen(
                         subTasks = subTasks.toMutableList().apply {
                             set(index, subTask.copy(completed = it))
                         }
-                    }
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.onSurface
+                    )
                 )
             }
         }

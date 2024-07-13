@@ -148,7 +148,7 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .background(if (isOverdue) Color.Red else Color.White)
+            .background(if (isOverdue) Color.Red else MaterialTheme.colorScheme.background)
             .combinedClickable(
                 onClick = { /* Do nothing on click */ },
                 onLongClick = onLongClick
