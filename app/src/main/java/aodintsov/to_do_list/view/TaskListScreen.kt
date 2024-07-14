@@ -67,6 +67,14 @@ fun TaskListScreen(
                             taskViewModel.searchTasks(it)
                         },
                         label = { Text("Search") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        ),
                         modifier = Modifier
                             .padding(8.dp)
                             .clip(RoundedCornerShape(8.dp))
@@ -88,7 +96,7 @@ fun TaskListScreen(
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
             Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
                 if (tasks.isEmpty()) {
                     Text(text = "No tasks available.")
@@ -148,7 +156,7 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .background(if (isOverdue) Color.Red else MaterialTheme.colorScheme.background)
+            .background(if (isOverdue) Color.Red else MaterialTheme.colorScheme.surface)
             .combinedClickable(
                 onClick = { /* Do nothing on click */ },
                 onLongClick = onLongClick
