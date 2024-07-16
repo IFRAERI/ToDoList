@@ -9,10 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -45,6 +42,13 @@ fun TaskListScreen(
     val isAscending by taskViewModel.isAscending.observeAsState(true)
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var filterState by remember { mutableStateOf(0) }
+
+    val filteredTasks = when (filterState) {
+        1 -> tasks.filter { it.completed }
+        2 -> tasks.filter { !it.completed }
+        else -> tasks
+    }
 
     LaunchedEffect(Unit) {
         val currentUserId = authViewModel.getCurrentUserId() ?: userId
@@ -57,7 +61,6 @@ fun TaskListScreen(
             TopAppBar(
                 title = { Text("Task List") },
                 actions = {
-
                     var searchQuery by remember { mutableStateOf("") }
 
                     TextField(
@@ -79,6 +82,18 @@ fun TaskListScreen(
                             .padding(8.dp)
                             .clip(RoundedCornerShape(8.dp))
                     )
+
+                    IconButton(onClick = {
+                        filterState = (filterState + 1) % 3
+                    }) {
+                        val icon = when (filterState) {
+                            1 -> Icons.Default.Check
+                            2 -> Icons.Default.Clear
+                            else -> Icons.Default.Circle
+                        }
+                        Icon(imageVector = icon, contentDescription = "Filter Tasks")
+                    }
+
                     IconButton(onClick = {
                         taskViewModel.toggleSortOrder()
                     }) {
@@ -87,6 +102,7 @@ fun TaskListScreen(
                             contentDescription = "Sort"
                         )
                     }
+
                     IconButton(onClick = {
                         showLogoutDialog = true
                     }) {
@@ -96,13 +112,22 @@ fun TaskListScreen(
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
-            Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-                if (tasks.isEmpty()) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .background(MaterialTheme.colorScheme.background)
+        ) {
+            Column(modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+            ) {
+                if (filteredTasks.isEmpty()) {
                     Text(text = "No tasks available.")
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
-                        items(tasks) { task ->
+                    LazyColumn(modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                    ) {
+                        items(filteredTasks) { task ->
                             TaskItem(task = task, onLongClick = {
                                 Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
                                 navController.navigate("addEditTask/${task.taskId}")
@@ -145,10 +170,10 @@ fun TaskListScreen(
         )
     }
 }
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
+    var isExpanded by remember { mutableStateOf(false) }
     val currentTime = System.currentTimeMillis()
     val isOverdue = task.dueDate?.let { it < currentTime && !task.completed } ?: false
 
@@ -158,7 +183,7 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
             .padding(vertical = 8.dp)
             .background(if (isOverdue) Color.Red else MaterialTheme.colorScheme.surface)
             .combinedClickable(
-                onClick = { /* Do nothing on click */ },
+                onClick = { isExpanded = !isExpanded },
                 onLongClick = onLongClick
             )
     ) {
@@ -174,8 +199,19 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
             }
             Text(
                 text = task.description,
-                maxLines = 4 // Limit description to 4 lines
+                maxLines = if (isExpanded) Int.MAX_VALUE else 4, // Limit description to 4 lines if not expanded
             )
+            if (isExpanded) {
+                Column {
+                    task.subTasks.forEach { subTask ->
+                        Text(
+                            text = subTask.title,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
+                    }
+                }
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = task.completed,

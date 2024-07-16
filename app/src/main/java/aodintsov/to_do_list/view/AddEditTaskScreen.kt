@@ -4,6 +4,8 @@ import android.app.DatePickerDialog
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+//import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +21,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -27,6 +31,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,9 +44,11 @@ import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +67,8 @@ fun AddEditTaskScreen(
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
     var assignedTo by rememberSaveable { mutableStateOf("") }
     var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(taskId) {
         Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")
@@ -101,105 +111,60 @@ fun AddEditTaskScreen(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 0.dp)
-            //.padding(16.dp)
+           // .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .background(MaterialTheme.colorScheme.background) // Set background color from theme
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        Text(
-            text = "Add/Edit Task",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = taskTitle,
-            onValueChange = { taskTitle = it },
-            label = { Text("Title") },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            ),
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        TextField(
-            value = taskDescription,
-            onValueChange = { taskDescription = it },
-            label = { Text("Description") },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            ),
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        Row(
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Checkbox(
-                checked = isCompleted,
-                onCheckedChange = {
-                    if (subTasks.all { it.completed } || subTasks.isEmpty()) {
-                        isCompleted = it
-                    }
-                },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.primary,
-                    uncheckedColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-            Text(text = "Completed", color = MaterialTheme.colorScheme.onBackground)
-        }
-
-        Row(
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
         ) {
             Text(
-                text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}",
+                text = "Add/Edit Task",
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { datePickerDialog.show() }) {
-                Text(text = "Set Deadline")
-            }
-        }
 
-        Text(text = "Subtasks:", color = MaterialTheme.colorScheme.onBackground)
-        subTasks.forEachIndexed { index, subTask ->
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                TextField(
-                    value = subTask.title,
-                    onValueChange = {
-                        subTasks = subTasks.toMutableList().apply {
-                            set(index, subTask.copy(title = it))
-                        }
-                    },
-                    label = { Text("Subtask ${index + 1}") },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    ),
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .weight(1f)
-                )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = taskTitle,
+                onValueChange = { taskTitle = it },
+                label = { Text("Title") },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            TextField(
+                value = taskDescription,
+                onValueChange = { taskDescription = it },
+                label = { Text("Description") },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
                 Checkbox(
-                    checked = subTask.completed,
+                    checked = isCompleted,
                     onCheckedChange = {
-                        subTasks = subTasks.toMutableList().apply {
-                            set(index, subTask.copy(completed = it))
+                        if (subTasks.all { it.completed } || subTasks.isEmpty()) {
+                            isCompleted = it
                         }
                     },
                     colors = CheckboxDefaults.colors(
@@ -207,70 +172,131 @@ fun AddEditTaskScreen(
                         uncheckedColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
+                Text(text = "Completed", color = MaterialTheme.colorScheme.onBackground)
             }
-        }
-        Button(onClick = {
-            subTasks = subTasks + SubTask(
-                subTaskId = System.currentTimeMillis().toString(),
-                title = "",
-                completed = false
-            )
-        }) {
-            Text(text = "Add Subtask")
-        }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                onClick = {
-                    if (taskId == null) {
-                        taskViewModel.addTask(
-                            Task(
-                                taskId = System.currentTimeMillis().toString(),
-                                title = taskTitle,
-                                description = taskDescription,
-                                userId = userId,
-                                completed = isCompleted,
-                                dueDate = deadline,
-                                assignedTo = assignedTo,
-                                subTasks = subTasks
-                            )
-                        )
-                    } else {
-                        val updatedTask = Task(
-                            taskId = taskId,
-                            title = taskTitle,
-                            description = taskDescription,
-                            userId = userId,
-                            completed = isCompleted,
-                            dueDate = deadline,
-                            assignedTo = assignedTo,
-                            subTasks = subTasks
-                        )
-                        taskViewModel.updateTask(updatedTask)
-                    }
-                    navController.navigateUp()
-                },
-                modifier = Modifier.weight(1f)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                Text(text = "Save Task")
+                Text(
+                    text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Button(onClick = { datePickerDialog.show() }) {
+                    Text(text = "Set Deadline")
+                }
             }
 
-            if (taskId != null) {
+            Text(text = "Subtasks:", color = MaterialTheme.colorScheme.onBackground)
+            subTasks.forEachIndexed { index, subTask ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextField(
+                        value = subTask.title,
+                        onValueChange = {
+                            subTasks = subTasks.toMutableList().apply {
+                                set(index, subTask.copy(title = it))
+                            }
+                        },
+                        label = { Text("Subtask ${index + 1}") },
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        ),
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .weight(1f)
+                    )
+                    Checkbox(
+                        checked = subTask.completed,
+                        onCheckedChange = {
+                            subTasks = subTasks.toMutableList().apply {
+                                set(index, subTask.copy(completed = it))
+                            }
+                        },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colorScheme.primary,
+                            uncheckedColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
+            }
+            Button(onClick = {
+                subTasks = subTasks + SubTask(
+                    subTaskId = System.currentTimeMillis().toString(),
+                    title = "",
+                    completed = false
+                )
+            }) {
+                Text(text = "Add Subtask")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Button(
                     onClick = {
-                        taskViewModel.deleteTask(taskId, userId)
-                        navController.navigateUp()
+                        if (taskTitle.isBlank() || taskDescription.isBlank()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Title and Description cannot be empty")
+                            }
+                        } else {
+                            if (taskId == null) {
+                                taskViewModel.addTask(
+                                    Task(
+                                        taskId = System.currentTimeMillis().toString(),
+                                        title = taskTitle,
+                                        description = taskDescription,
+                                        userId = userId,
+                                        completed = isCompleted,
+                                        dueDate = deadline,
+                                        assignedTo = assignedTo,
+                                        subTasks = subTasks
+                                    )
+                                )
+                            } else {
+                                val updatedTask = Task(
+                                    taskId = taskId,
+                                    title = taskTitle,
+                                    description = taskDescription,
+                                    userId = userId,
+                                    completed = isCompleted,
+                                    dueDate = deadline,
+                                    assignedTo = assignedTo,
+                                    subTasks = subTasks
+                                )
+                                taskViewModel.updateTask(updatedTask)
+                            }
+                            navController.navigateUp()
+                        }
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "Delete Task")
+                    Text(text = "Save Task")
+                }
+
+                if (taskId != null) {
+                    Button(
+                        onClick = {
+                            taskViewModel.deleteTask(taskId, userId)
+                            navController.navigateUp()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = "Delete Task")
+                    }
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
