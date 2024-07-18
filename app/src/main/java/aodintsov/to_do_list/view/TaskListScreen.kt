@@ -56,58 +56,65 @@ fun TaskListScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+        .padding(start = 8.dp, end = 8.dp),
         topBar = {
             TopAppBar(
                 title = { Text("Task List") },
                 actions = {
                     var searchQuery by remember { mutableStateOf("") }
-
-                    TextField(
-                        value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
-                            taskViewModel.searchTasks(it)
-                        },
-                        label = { Text("Search") },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        ),
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-
-                    IconButton(onClick = {
-                        filterState = (filterState + 1) % 3
-                    }) {
-                        val icon = when (filterState) {
-                            1 -> Icons.Default.Check
-                            2 -> Icons.Default.Clear
-                            else -> Icons.Default.Circle
-                        }
-                        Icon(imageVector = icon, contentDescription = "Filter Tasks")
-                    }
-
-                    IconButton(onClick = {
-                        taskViewModel.toggleSortOrder()
-                    }) {
-                        Icon(
-                            imageVector = if (isAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                            contentDescription = "Sort"
+                    Row {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = {
+                                searchQuery = it
+                                taskViewModel.searchTasks(it)
+                            },
+                            label = { Text("Search") },
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier
+                                .weight(0.65f)
+                                //.padding(8.dp)
+                                .clip(RoundedCornerShape(8.dp))
                         )
+                        Spacer(modifier = Modifier.weight(0.05f))
+
+                        IconButton(onClick = {
+                            filterState = (filterState + 1) % 3
+                        }) {
+                            val icon = when (filterState) {
+                                1 -> Icons.Default.Check
+                                2 -> Icons.Default.Clear
+                                else -> Icons.Default.Circle
+                            }
+                            Icon(imageVector = icon, contentDescription = "Filter Tasks")
+                        }
+
+                        IconButton(onClick = {
+                            taskViewModel.toggleSortOrder()
+                        }) {
+                            Icon(
+                                imageVector = if (isAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                contentDescription = "Sort"
+                            )
+                        }
+
+                        IconButton(onClick = {
+                            showLogoutDialog = true
+                        }) {
+                            Icon(Icons.Default.Logout, contentDescription = "Logout")
+                        }
                     }
 
-                    IconButton(onClick = {
-                        showLogoutDialog = true
-                    }) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout")
-                    }
+
                 }
             )
         }
