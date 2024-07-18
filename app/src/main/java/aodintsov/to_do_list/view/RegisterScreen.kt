@@ -21,6 +21,7 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    var showSnackbar by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -28,7 +29,9 @@ fun RegisterScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Register")
+        Text(text = "Регистрация")
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = email,
@@ -48,12 +51,18 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                authViewModel.register(email, password) { success ->
-                    if (success) {
-                        navController.navigate("taskList")
-                    } else {
-                        // Handle registration failure
-                        errorMessage = "Registration failed. Please try again."
+                if (email.isBlank() || password.isBlank()) {
+                    errorMessage = "Email и пароль не должны быть пустыми"
+                    showSnackbar = true
+                } else {
+                    authViewModel.register(email, password) { success ->
+                        if (success) {
+                            navController.navigate("taskList")
+                        } else {
+                            // Обработка ошибки регистрации
+                            errorMessage = "Регистрация не удалась. Пожалуйста, попробуйте снова."
+                            showSnackbar = true
+                        }
                     }
                 }
             },
@@ -69,6 +78,19 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Login")
+        }
+    }
+
+    if (showSnackbar) {
+        Snackbar(
+            action = {
+                Button(onClick = { showSnackbar = false }) {
+                    Text("Dismiss")
+                }
+            },
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(text = errorMessage ?: "Unknown error")
         }
     }
 }

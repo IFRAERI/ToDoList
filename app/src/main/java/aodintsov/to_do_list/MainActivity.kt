@@ -1,26 +1,26 @@
 package aodintsov.to_do_list
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import aodintsov.to_do_list.model.TaskRepositoryImpl
 import aodintsov.to_do_list.navigation.AppNavigation
 import aodintsov.to_do_list.ui.theme.ToDoListTheme
-import aodintsov.to_do_list.view.LoginScreen
 import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
+import aodintsov.to_do_list.viewmodel.NavControllerViewModel
+import aodintsov.to_do_list.viewmodel.NavControllerViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
@@ -37,7 +37,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ToDoListTheme {
-                val navController = rememberNavController()
+                val navControllerViewModel = rememberNavControllerViewModel()
+                val navController = navControllerViewModel.navController
+
                 var showLogoutDialog by remember { mutableStateOf(false) }
 
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -51,13 +53,32 @@ class MainActivity : ComponentActivity() {
                     showLogoutDialog = showLogoutDialog,
                     onDismissLogoutDialog = { showLogoutDialog = false }
                 )
+
+                DisposableEffect(Unit) {
+                    onDispose {
+                        navControllerViewModel.saveState()
+                    }
+                }
             }
         }
     }
 
+    @SuppressLint("RememberReturnType")
+    @Composable
+    fun rememberNavControllerViewModel(): NavControllerViewModel {
+        val context = LocalContext.current
+        val factory = NavControllerViewModelFactory(SavedStateHandle())
+        val viewModel: NavControllerViewModel = viewModel(factory = factory)
+        val navController = rememberNavController()
+        remember(navController) {
+            viewModel.initializeNavController(navController)
+        }
+        return viewModel
+    }
+
     @Composable
     private fun Content(
-        navController: NavController,
+        navController: NavHostController,
         authViewModelFactory: AuthViewModelFactory,
         taskViewModelFactory: TaskViewModelFactory,
         firebaseAuth: FirebaseAuth,
@@ -66,22 +87,15 @@ class MainActivity : ComponentActivity() {
         onDismissLogoutDialog: () -> Unit
     ) {
         val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
-        val taskViewModel: TaskViewModel by viewModels {
-            taskViewModelFactory
-        }
+        val taskViewModel: TaskViewModel by viewModels { taskViewModelFactory }
 
-        val currentUser = firebaseAuth.currentUser
-        if (currentUser != null) {
-            taskViewModel.fetchTasks(currentUser.uid)
-            AppNavigation(
-                navController = navController,
-                taskViewModelFactory = taskViewModelFactory,
-                authViewModelFactory = authViewModelFactory,
-                modifier = modifier
-            )
-        } else {
-            LoginScreen(navController, authViewModelFactory = authViewModelFactory)
-        }
+        AppNavigation(
+            navController = navController,
+            taskViewModelFactory = taskViewModelFactory,
+            authViewModelFactory = authViewModelFactory,
+            firebaseAuth = firebaseAuth,
+            modifier = modifier
+        )
 
         if (showLogoutDialog) {
             AlertDialog(
@@ -109,7 +123,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun createSavedStateHandle(): SavedStateHandle {
-        val savedStateHandle = SavedStateHandle()
-        return savedStateHandle
+        return SavedStateHandle()
     }
 }

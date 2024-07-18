@@ -29,4 +29,15 @@ class AuthViewModel(private val firebaseAuth: FirebaseAuth) : ViewModel() {
         firebaseAuth.signOut()
         onSuccess()
     }
+
+    fun sendPasswordResetEmail(email: String, onComplete: (Boolean, Exception?) -> Unit) {
+        firebaseAuth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onComplete(true, null)
+                } else {
+                    onComplete(false, task.exception)
+                }
+            }
+    }
 }

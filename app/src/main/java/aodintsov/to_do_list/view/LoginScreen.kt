@@ -1,5 +1,6 @@
 package aodintsov.to_do_list.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +23,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
     var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
@@ -49,18 +51,22 @@ fun LoginScreen(
 
         Button(
             onClick = {
+                Log.d("LoginScreen", "Login button clicked")
                 if (email.isBlank() || password.isBlank()) {
-                    errorMessage = "Email and password must not be empty"
+                    snackbarMessage = "Email и пароль не должны быть пустыми"
                     showSnackbar = true
+                    Log.d("LoginScreen", "Email or password is blank")
                 } else {
                     authViewModel.login(email, password) { success ->
                         if (success) {
+                            Log.d("LoginScreen", "Login successful")
                             navController.navigate("taskList") {
                                 popUpTo("login") { inclusive = true }
                             }
                         } else {
-                            errorMessage = "Login failed. Please try again."
+                            snackbarMessage = "Вход не удался. Пожалуйста, попробуйте снова."
                             showSnackbar = true
+                            Log.d("LoginScreen", "Login failed")
                         }
                     }
                 }
@@ -73,10 +79,45 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = { navController.navigate("register") },
+            onClick = {
+                Log.d("LoginScreen", "Register button clicked")
+                try {
+                    navController.navigate("register")
+                    Log.d("LoginScreen", "Navigated to register")
+                } catch (e: Exception) {
+                    Log.e("LoginScreen", "Navigation error: ${e.message}")
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Register")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                Log.d("LoginScreen", "Forgot Password button clicked")
+                if (email.isNotBlank()) {
+                    authViewModel.sendPasswordResetEmail(email) { success, exception ->
+                        if (success) {
+                            snackbarMessage = "Password reset email sent!"
+                            Log.d("LoginScreen", "Password reset email sent")
+                        } else {
+                            snackbarMessage = "Failed to send password reset email: ${exception?.message}"
+                            Log.d("LoginScreen", "Failed to send password reset email: ${exception?.message}")
+                        }
+                        showSnackbar = true
+                    }
+                } else {
+                    snackbarMessage = "Please enter your email"
+                    showSnackbar = true
+                    Log.d("LoginScreen", "Email is blank for password reset")
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Forgot Password")
         }
     }
 
@@ -89,7 +130,7 @@ fun LoginScreen(
             },
             modifier = Modifier.padding(8.dp)
         ) {
-            Text(text = errorMessage ?: "Unknown error")
+            Text(text = snackbarMessage ?: "Unknown error")
         }
     }
 }

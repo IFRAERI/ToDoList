@@ -201,14 +201,29 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                 text = task.description,
                 maxLines = if (isExpanded) Int.MAX_VALUE else 4, // Limit description to 4 lines if not expanded
             )
+//            Text(
+//                text = "Created on: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(task.taskId.toLong()))}",
+//                style = MaterialTheme.typography.bodySmall,
+//                color = Color.Gray
+//            )
             if (isExpanded) {
                 Column {
                     task.subTasks.forEach { subTask ->
-                        Text(
-                            text = subTask.title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(start = 26.dp, top = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (subTask.completed) Icons.Default.Check else Icons.Default.Clear,
+                                contentDescription = null,
+                                tint = if (subTask.completed) Color.Green else Color.Red
+                            )
+                            Text(
+                                text = subTask.title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
                     }
                 }
             }
