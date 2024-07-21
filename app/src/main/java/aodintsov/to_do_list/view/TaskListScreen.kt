@@ -17,9 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import aodintsov.to_do_list.R
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
@@ -58,10 +60,10 @@ fun TaskListScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-        .padding(start = 8.dp, end = 8.dp),
+            .padding(start = 8.dp, end = 8.dp),
         topBar = {
             TopAppBar(
-                title = { Text("Task List") },
+                title = { Text(stringResource(id = R.string.task_list_title)) },
                 actions = {
                     var searchQuery by remember { mutableStateOf("") }
                     Row {
@@ -71,7 +73,7 @@ fun TaskListScreen(
                                 searchQuery = it
                                 taskViewModel.searchTasks(it)
                             },
-                            label = { Text("Search") },
+                            label = { Text(stringResource(id = R.string.search_label)) },
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -95,7 +97,7 @@ fun TaskListScreen(
                                 2 -> Icons.Default.Clear
                                 else -> Icons.Default.Circle
                             }
-                            Icon(imageVector = icon, contentDescription = "Filter Tasks")
+                            Icon(imageVector = icon, contentDescription = stringResource(id = R.string.filter_tasks))
                         }
 
                         IconButton(onClick = {
@@ -103,14 +105,14 @@ fun TaskListScreen(
                         }) {
                             Icon(
                                 imageVector = if (isAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                                contentDescription = "Sort"
+                                contentDescription = stringResource(id = R.string.sort)
                             )
                         }
 
                         IconButton(onClick = {
                             showLogoutDialog = true
                         }) {
-                            Icon(Icons.Default.Logout, contentDescription = "Logout")
+                            Icon(Icons.Default.Logout, contentDescription = stringResource(id = R.string.logout))
                         }
                     }
 
@@ -128,7 +130,7 @@ fun TaskListScreen(
                 .padding(16.dp)
             ) {
                 if (filteredTasks.isEmpty()) {
-                    Text(text = "No tasks available.")
+                    Text(text = stringResource(id = R.string.no_tasks_available))
                 } else {
                     LazyColumn(modifier = Modifier
                         .fillMaxSize()
@@ -147,7 +149,7 @@ fun TaskListScreen(
                     onClick = { navController.navigate("addEditTask") },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(text = "Add Task")
+                    Text(text = stringResource(id = R.string.add_task))
                 }
             }
         }
@@ -156,8 +158,8 @@ fun TaskListScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Confirm Logout") },
-            text = { Text("Are you sure you want to logout?") },
+            title = { Text(stringResource(id = R.string.confirm_logout)) },
+            text = { Text(stringResource(id = R.string.logout_message)) },
             confirmButton = {
                 Button(onClick = {
                     authViewModel.signOut{}
@@ -166,17 +168,18 @@ fun TaskListScreen(
                     }
                     showLogoutDialog = false
                 }) {
-                    Text("Logout")
+                    Text(stringResource(id = R.string.logout_confirm))
                 }
             },
             dismissButton = {
                 Button(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.logout_cancel))
                 }
             }
         )
     }
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
@@ -239,11 +242,11 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                     checked = task.completed,
                     onCheckedChange = null // Task completion state is read-only in this context
                 )
-                Text(text = "Completed")
+                Text(text = stringResource(id = R.string.completed))
             }
             task.dueDate?.let {
                 val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(it))
-                Text(text = "Deadline: $formattedDate")
+                Text(text = stringResource(id = R.string.deadline, formattedDate))
             }
         }
     }

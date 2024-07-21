@@ -49,6 +49,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import aodintsov.to_do_list.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +117,7 @@ fun AddEditTaskScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 0.dp)
-           // .padding(horizontal = 16.dp)
+            // .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
             .background(MaterialTheme.colorScheme.background)
@@ -125,7 +127,7 @@ fun AddEditTaskScreen(
                 .fillMaxSize()
         ) {
             Text(
-                text = "Add/Edit Task",
+                text = stringResource(R.string.add_edit_task_title), //"Add/Edit Task",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -135,7 +137,7 @@ fun AddEditTaskScreen(
             TextField(
                 value = taskTitle,
                 onValueChange = { taskTitle = it },
-                label = { Text("Title") },
+                label = { Text(stringResource(R.string.title_label)) },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -147,7 +149,7 @@ fun AddEditTaskScreen(
             TextField(
                 value = taskDescription,
                 onValueChange = { taskDescription = it },
-                label = { Text("Description") },
+                label = { Text(stringResource(R.string.description_label)) },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -172,24 +174,29 @@ fun AddEditTaskScreen(
                         uncheckedColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
-                Text(text = "Completed", color = MaterialTheme.colorScheme.onBackground)
+                Text(text = stringResource(R.string.completed), color = MaterialTheme.colorScheme.onBackground)
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                Text(
-                    text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}",
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                MyDeadlineText(deadline)
+
+//                Text(
+//                    val deadlineText = deadline?.let { dateFormatter.format(it) } ?: stringResource(R.string.no_deadline)
+//                    //text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}",
+//                    //text = stringResource(R.string.deadline, dateFormatter.format(deadline ?: "")),
+//                     Text(text = stringResource(R.string.deadline, deadlineText))
+//                    color = MaterialTheme.colorScheme.onBackground
+//                )
                 Spacer(modifier = Modifier.weight(1f))
                 Button(onClick = { datePickerDialog.show() }) {
                     Text(text = "Set Deadline")
                 }
             }
 
-            Text(text = "Subtasks:", color = MaterialTheme.colorScheme.onBackground)
+            Text(text = stringResource(R.string.subtasks_label), color = MaterialTheme.colorScheme.onBackground)
             subTasks.forEachIndexed { index, subTask ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextField(
@@ -199,7 +206,7 @@ fun AddEditTaskScreen(
                                 set(index, subTask.copy(title = it))
                             }
                         },
-                        label = { Text("Subtask ${index + 1}") },
+                        label = { Text(stringResource(R.string.subtasks_label, index + 1)) },
                         colors = TextFieldDefaults.textFieldColors(
                             containerColor = MaterialTheme.colorScheme.surface,
                             focusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -230,7 +237,7 @@ fun AddEditTaskScreen(
                     completed = false
                 )
             }) {
-                Text(text = "Add Subtask")
+                Text(text = stringResource(R.string.add_subtask))
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -243,7 +250,7 @@ fun AddEditTaskScreen(
                     onClick = {
                         if (taskTitle.isBlank() || taskDescription.isBlank()) {
                             scope.launch {
-                                snackbarHostState.showSnackbar("Title and Description cannot be empty")
+                                snackbarHostState.showSnackbar(R.string.empty_fields_message.toString())
                             }
                         } else {
                             if (taskId == null) {
@@ -277,7 +284,7 @@ fun AddEditTaskScreen(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "Save Task")
+                    Text(text = stringResource(R.string.save_task))
                 }
 
                 if (taskId != null) {
@@ -288,7 +295,7 @@ fun AddEditTaskScreen(
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(text = "Delete Task")
+                        Text(text = stringResource(R.string.delete_task))
                     }
                 }
             }
@@ -299,4 +306,19 @@ fun AddEditTaskScreen(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
+}
+
+@Composable
+fun MyDeadlineText(deadline: Long?) {
+    val context = LocalContext.current
+    val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+    val deadlineText = deadline?.let {
+        dateFormatter.format(it)
+    } ?: stringResource(id = R.string.no_deadline)
+
+    Text(
+        text = stringResource(id = R.string.deadline, deadlineText),
+        color = MaterialTheme.colorScheme.onBackground
+    )
 }

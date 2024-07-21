@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">Список дел</string>
+    <string name="task_list_title">Список задач</string>
+    <string name="search_label">Поиск</string>
+    <string name="filter_tasks">Фильтр задач</string>
+    <string name="sort">Сортировка</string>
+    <string name="logout">Выйти</string>
+    <string name="no_tasks_available">Задачи отсутствуют.</string>
+    <string name="add_task">Добавить задачу</string>
+    <string name="confirm_logout">Подтвердите выход</string>
+    <string name="logout_message">Вы уверены, что хотите выйти?</string>
+    <string name="logout_confirm">Выйти</string>
+    <string name="logout_cancel">Отмена</string>
+    <string name="completed">Завершено</string>
+    <string name="deadline">Дедлайн: %1$s</string>
+    <string name="add_edit_task_title">Добавить/Редактировать задачу</string>
+    <string name="title_label">Название</string>
+    <string name="description_label">Описание</string>
+    <string name="set_deadline">Установить дедлайн</string>
+    <string name="subtasks_label">Подзадачи:</string>
+    <string name="add_subtask">Добавить подзадачу</string>
+    <string name="save_task">Сохранить задачу</string>
+    <string name="delete_task">Удалить задачу</string>
+    <string name="empty_fields_message">Название и описание не могут быть пустыми</string>
+    <string name="no_deadline">Нет дедлайна</string>
+    <string name="login_screen_title">Вход</string>
+    <string name="email_label">Электронная почта</string>
+    <string name="password_label">Пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="register_button">Регистрация</string>
+    <string name="forgot_password_button">Забыли пароль?</string>
+    <string name="empty_fields_error">Поля электронной почты и пароля не должны быть пустыми.</string>
+    <string name="login_failed_error">Не удалось войти. Пожалуйста, попробуйте еще раз.</string>
+    <string name="reset_email_sent">Письмо для сброса пароля отправлено!</string>
+    <string name="reset_email_failed">Не удалось отправить письмо для сброса пароля: %1$s</string>
+    <string name="enter_email_for_reset">Пожалуйста, введите вашу электронную почту</string>
+    <string name="dismiss">Закрыть</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="registration_title">Регистрация</string>
+    <string name="password_length_error">Пароль должен содержать не менее 8 символов</string>
+    <string name="registration_failed_error">Регистрация не удалась. Пожалуйста, попробуйте снова</string>
+
+</resources>

@@ -1,3 +1,43 @@
 <resources>
-    <string name="app_name">To-Do-List</string>
+    <string name="app_name">To-Do List</string>
+    <string name="task_list_title">Task List</string>
+    <string name="search_label">Search</string>
+    <string name="filter_tasks">Filter Tasks</string>
+    <string name="sort">Sort</string>
+    <string name="logout">Logout</string>
+    <string name="no_tasks_available">No tasks available.</string>
+    <string name="add_task">Add Task</string>
+    <string name="confirm_logout">Confirm Logout</string>
+    <string name="logout_message">Are you sure you want to logout?</string>
+    <string name="logout_confirm">Logout</string>
+    <string name="logout_cancel">Cancel</string>
+    <string name="completed">Completed</string>
+    <string name="deadline">Deadline: %1$s</string>
+    <string name="add_edit_task_title">Add/Edit Task</string>
+    <string name="title_label">Title</string>
+    <string name="description_label">Description</string>
+    <string name="set_deadline">Set Deadline</string>
+    <string name="subtasks_label">Subtasks:</string>
+    <string name="add_subtask">Add Subtask</string>
+    <string name="save_task">Save Task</string>
+    <string name="delete_task">Delete Task</string>
+    <string name="empty_fields_message">Title and Description cannot be empty</string>
+    <string name="no_deadline">No deadline</string>
+    <string name="login_screen_title">Login</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="login_button">Login</string>
+    <string name="register_button">Register</string>
+    <string name="forgot_password_button">Forgot Password</string>
+    <string name="empty_fields_error">Email and password cannot be empty.</string>
+    <string name="login_failed_error">Login failed. Please try again.</string>
+    <string name="reset_email_sent">Password reset email sent!</string>
+    <string name="reset_email_failed">Failed to send password reset email: %1$s</string>
+    <string name="enter_email_for_reset">Please enter your email</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="registration_title">Registration</string>
+    <string name="password_length_error">The password must contain at least 8 characters</string>
+    <string name="registration_failed_error">Registration failed. Please try again</string>
+
 </resources>
