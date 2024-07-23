@@ -78,6 +78,9 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.material.icons.extended)
+    //implementation (com.google.accompanist:accompanist-navigation-animation:0.35.1-alpha)
+
+
     implementation("androidx.compose.material3:material3:1.2.1") {
         exclude(group = "com.intellij", module = "annotations")
     }

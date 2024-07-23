@@ -103,7 +103,7 @@ fun AddEditTaskScreen(
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     deadline?.let { calendar.timeInMillis = it }
-    val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+   // val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     val datePickerDialog = DatePickerDialog(
         context,
@@ -141,8 +141,9 @@ fun AddEditTaskScreen(
                 value = taskTitle,
                 onValueChange = { taskTitle = it },
                 label = { Text(stringResource(R.string.title_label)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 ),
@@ -153,8 +154,9 @@ fun AddEditTaskScreen(
                 value = taskDescription,
                 onValueChange = { taskDescription = it },
                 label = { Text(stringResource(R.string.description_label)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 ),
@@ -227,8 +229,9 @@ fun AddEditTaskScreen(
                             }
                         },
                         label = { Text(stringResource(R.string.subtasks_label, index + 1)) },
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedTextColor = MaterialTheme.colorScheme.onSurface,
                             unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         ),
@@ -337,7 +340,7 @@ fun AddEditTaskScreen(
 
 @Composable
 fun MyDeadlineText(deadline: Long?) {
-    val context = LocalContext.current
+   // val context = LocalContext.current
     val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     val deadlineText = deadline?.let {

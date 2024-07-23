@@ -1,6 +1,7 @@
 package aodintsov.to_do_list.view
 
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -53,6 +54,10 @@ fun TaskListScreen(
     var filterState by remember { mutableIntStateOf(0) }
     val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     val today = dateFormatter.format(Date())
+    val calendar = Calendar.getInstance()
+    calendar.time = Date()
+    calendar.add(Calendar.DAY_OF_YEAR, -7)
+    val sevenDaysAgo = dateFormatter.format(calendar.time)
 //    var filteredTasks: List<Task>
 //    val groupedTasks = filteredTasks.groupBy {
 
@@ -170,6 +175,7 @@ fun TaskListScreen(
                     ) {
                         groupedTasks.forEach { (date, tasks) ->
                             item {
+                                val isExpanded = date>= sevenDaysAgo
 
                                 ExpandableSection(title = date, initiallyExpanded = date == today) {
                                     tasks.forEach { task ->
@@ -235,6 +241,7 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     val currentTime = System.currentTimeMillis()
     val isOverdue = task.dueDate?.let { it < currentTime && !task.completed } ?: false
+    val rotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f)
 
     Card(
         modifier = Modifier
@@ -245,14 +252,21 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                 onClick = { isExpanded = !isExpanded },
                 onLongClick = onLongClick
             )
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = task.title, modifier = Modifier.weight(1f))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = task.title,
+                        modifier = Modifier.weight(1f)
+                    )
                     if (task.completed && !isExpanded) {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -262,14 +276,20 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                         )
                     }
                 }
-                IconButton(onClick = { onLongClick() }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Edit Task")
+                if (isExpanded) {
+                    IconButton(onClick = { onLongClick() }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Edit Task")
+                    }
                 }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    modifier = Modifier.rotate(rotation)
+                )
             }
             if (isExpanded) {
                 Text(
                     text = task.description,
-                    maxLines = if (isExpanded) Int.MAX_VALUE else 4, // Limit description to 4 lines if not expanded
                 )
                 Column {
                     task.subTasks.forEach { subTask ->
@@ -308,16 +328,16 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
 
 
 
-
 @Composable
 fun ExpandableSection(title: String, initiallyExpanded: Boolean = false, content: @Composable () -> Unit) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
-    val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
+    val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "")
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
+            .animateContentSize()  // Добавление анимации изменения размера
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -342,6 +362,7 @@ fun ExpandableSection(title: String, initiallyExpanded: Boolean = false, content
         }
     }
 }
+
 
 @Composable
 fun RoundedDivider(modifier: Modifier = Modifier) {
