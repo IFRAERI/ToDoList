@@ -51,7 +51,6 @@ import java.util.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import aodintsov.to_do_list.R
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskScreen(
@@ -61,6 +60,7 @@ fun AddEditTaskScreen(
     taskViewModelFactory: TaskViewModelFactory,
     modifier: Modifier = Modifier
 ) {
+    var priorityTask by rememberSaveable { mutableStateOf(false) }
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     var taskTitle by rememberSaveable { mutableStateOf("") }
     var taskDescription by rememberSaveable { mutableStateOf("") }
@@ -69,6 +69,7 @@ fun AddEditTaskScreen(
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
     var assignedTo by rememberSaveable { mutableStateOf("") }
     var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
+    var completionDate by rememberSaveable { mutableStateOf<Long?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -90,6 +91,8 @@ fun AddEditTaskScreen(
                 deadline = task.dueDate
                 assignedTo = task.assignedTo
                 subTasks = task.subTasks
+                priorityTask = task.priority
+                completionDate = task.completionDate
                 taskLoaded = true
             } else {
                 Log.d("AddEditTaskScreen", "Task not found with taskId: $taskId")
@@ -107,6 +110,7 @@ fun AddEditTaskScreen(
         { _, year, month, dayOfMonth ->
             calendar.set(year, month, dayOfMonth)
             deadline = calendar.timeInMillis
+            priorityTask = true // Автоматически устанавливаем высокий приоритет при установке дедлайна
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -117,7 +121,6 @@ fun AddEditTaskScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 0.dp)
-            // .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
             .background(MaterialTheme.colorScheme.background)
@@ -127,7 +130,7 @@ fun AddEditTaskScreen(
                 .fillMaxSize()
         ) {
             Text(
-                text = stringResource(R.string.add_edit_task_title), //"Add/Edit Task",
+                text = stringResource(R.string.add_edit_task_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -167,6 +170,7 @@ fun AddEditTaskScreen(
                     onCheckedChange = {
                         if (subTasks.all { it.completed } || subTasks.isEmpty()) {
                             isCompleted = it
+                            completionDate = if (it) System.currentTimeMillis() else null
                         }
                     },
                     colors = CheckboxDefaults.colors(
@@ -176,23 +180,39 @@ fun AddEditTaskScreen(
                 )
                 Text(text = stringResource(R.string.completed), color = MaterialTheme.colorScheme.onBackground)
             }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Checkbox(
+                    checked = priorityTask,
+                    onCheckedChange = { if (deadline == null) priorityTask = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+                Text(
+                    text = stringResource(R.string.priority),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 MyDeadlineText(deadline)
-
-//                Text(
-//                    val deadlineText = deadline?.let { dateFormatter.format(it) } ?: stringResource(R.string.no_deadline)
-//                    //text = "Deadline: ${deadline?.let { dateFormatter.format(it) } ?: "No deadline"}",
-//                    //text = stringResource(R.string.deadline, dateFormatter.format(deadline ?: "")),
-//                     Text(text = stringResource(R.string.deadline, deadlineText))
-//                    color = MaterialTheme.colorScheme.onBackground
-//                )
                 Spacer(modifier = Modifier.weight(1f))
-                Button(onClick = { datePickerDialog.show() }) {
-                    Text(text = "Set Deadline")
+                Button(onClick = {
+                    if (deadline != null) {
+                        deadline = null
+                        priorityTask = false
+                    } else {
+                        datePickerDialog.show()
+                    }
+                }) {
+                    Text(text = if (deadline != null) stringResource(R.string.remove_deadline) else stringResource(R.string.set_deadline))
                 }
             }
 
@@ -223,6 +243,7 @@ fun AddEditTaskScreen(
                                 set(index, subTask.copy(completed = it))
                             }
                         },
+                        enabled = subTask.title.isNotBlank(),
                         colors = CheckboxDefaults.colors(
                             checkedColor = MaterialTheme.colorScheme.primary,
                             uncheckedColor = MaterialTheme.colorScheme.onSurface
@@ -253,6 +274,7 @@ fun AddEditTaskScreen(
                                 snackbarHostState.showSnackbar(R.string.empty_fields_message.toString())
                             }
                         } else {
+                            subTasks = subTasks.filter { it.title.isNotBlank() }
                             if (taskId == null) {
                                 taskViewModel.addTask(
                                     Task(
@@ -263,7 +285,10 @@ fun AddEditTaskScreen(
                                         completed = isCompleted,
                                         dueDate = deadline,
                                         assignedTo = assignedTo,
-                                        subTasks = subTasks
+                                        subTasks = subTasks,
+                                        priority = priorityTask,
+                                        createdAt = System.currentTimeMillis(),
+                                        completionDate = if (isCompleted) System.currentTimeMillis() else null
                                     )
                                 )
                             } else {
@@ -275,7 +300,9 @@ fun AddEditTaskScreen(
                                     completed = isCompleted,
                                     dueDate = deadline,
                                     assignedTo = assignedTo,
-                                    subTasks = subTasks
+                                    subTasks = subTasks,
+                                    priority = priorityTask,
+                                    completionDate = if (isCompleted) System.currentTimeMillis() else null
                                 )
                                 taskViewModel.updateTask(updatedTask)
                             }

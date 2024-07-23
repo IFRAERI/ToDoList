@@ -3,12 +3,14 @@ package aodintsov.to_do_list.view
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+//import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,6 +31,8 @@ import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
+//import androidx.compose.material3.Divider
+//import androidx.room.parser.expansion.ExpandableSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,13 +48,28 @@ fun TaskListScreen(
     val isAscending by taskViewModel.isAscending.observeAsState(true)
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     var showLogoutDialog by remember { mutableStateOf(false) }
-    var filterState by remember { mutableStateOf(0) }
+    var filterState by remember { mutableIntStateOf(0) }
+    val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val today = dateFormatter.format(Date())
+//    var filteredTasks: List<Task>
+//    val groupedTasks = filteredTasks.groupBy {
+
+
+
 
     val filteredTasks = when (filterState) {
         1 -> tasks.filter { it.completed }
         2 -> tasks.filter { !it.completed }
         else -> tasks
     }
+    val highPriorityTasks = filteredTasks.filter { it.priority && !it.completed }
+    val groupedTasks = filteredTasks.groupBy { task ->
+        dateFormatter.format(Date(task.createdAt ?: 0))
+    }.toMutableMap()
+    groupedTasks[today] = (groupedTasks[today] ?: emptyList()) + highPriorityTasks.filterNot { task ->
+        groupedTasks[today]?.contains(task) == true
+    }
+
 
     LaunchedEffect(Unit) {
         val currentUserId = authViewModel.getCurrentUserId() ?: userId
@@ -80,7 +99,9 @@ fun TaskListScreen(
                                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
                                 unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = 0.5f
+                                )
                             ),
                             modifier = Modifier
                                 .weight(0.65f)
@@ -97,7 +118,10 @@ fun TaskListScreen(
                                 2 -> Icons.Default.Clear
                                 else -> Icons.Default.Circle
                             }
-                            Icon(imageVector = icon, contentDescription = stringResource(id = R.string.filter_tasks))
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = stringResource(id = R.string.filter_tasks)
+                            )
                         }
 
                         IconButton(onClick = {
@@ -112,7 +136,10 @@ fun TaskListScreen(
                         IconButton(onClick = {
                             showLogoutDialog = true
                         }) {
-                            Icon(Icons.Default.Logout, contentDescription = stringResource(id = R.string.logout))
+                            Icon(
+                                Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = stringResource(id = R.string.logout)
+                            )
                         }
                     }
 
@@ -121,26 +148,47 @@ fun TaskListScreen(
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier
-            .padding(innerPadding)
-            .background(MaterialTheme.colorScheme.background)
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            Column(modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp)
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
                 if (filteredTasks.isEmpty()) {
                     Text(text = stringResource(id = R.string.no_tasks_available))
                 } else {
-                    LazyColumn(modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f)
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f)
                     ) {
-                        items(filteredTasks) { task ->
-                            TaskItem(task = task, onLongClick = {
-                                Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
-                                navController.navigate("addEditTask/${task.taskId}")
-                            })
+                        groupedTasks.forEach { (date, tasks) ->
+                            item {
+
+                                ExpandableSection(title = date, initiallyExpanded = date == today) {
+                                    tasks.forEach { task ->
+                                        TaskItem(task = task, onLongClick = {
+                                            Log.d(
+                                                "TaskListScreen",
+                                                "Navigating to addEditTask with taskId: ${task.taskId}"
+                                            )
+                                            navController.navigate("addEditTask/${task.taskId}")
+                                        })
+                                        //HorizontalDivider()
+                                        RoundedDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                                    }
+                                }
+                            }
+//                        items(filteredTasks) { task ->
+//                            TaskItem(task = task, onLongClick = {
+//                                Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
+//                                navController.navigate("addEditTask/${task.taskId}")
+//                            })
                         }
                     }
                 }
@@ -162,7 +210,7 @@ fun TaskListScreen(
             text = { Text(stringResource(id = R.string.logout_message)) },
             confirmButton = {
                 Button(onClick = {
-                    authViewModel.signOut{}
+                    authViewModel.signOut {}
                     navController.navigate("login") {
                         popUpTo("taskList") { inclusive = true }
                     }
@@ -250,4 +298,41 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
             }
         }
     }
+}
+
+
+@Composable
+fun ExpandableSection(title: String, initiallyExpanded: Boolean = false, content: @Composable () -> Unit) {
+    var expanded by remember { mutableStateOf(initiallyExpanded) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(8.dp)
+        )
+        if (expanded) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun RoundedDivider(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(8.dp)
+            )
+    )
 }

@@ -39,5 +39,7 @@
     <string name="registration_title">Registration</string>
     <string name="password_length_error">The password must contain at least 8 characters</string>
     <string name="registration_failed_error">Registration failed. Please try again</string>
+    <string name="priority">High priority</string>
+    <string name="remove_deadline">Remove deadline</string>
 
 </resources>

@@ -45,38 +45,45 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += setOf("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.8.0")
-    implementation(platform("androidx.compose:compose-bom:2023.05.01"))
-    implementation("androidx.compose.ui:ui:1.5.1")
-    implementation("androidx.compose.ui:ui-graphics:1.5.1")
-    implementation("androidx.compose.ui:ui-tooling:1.5.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.5.1")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha06")
-    implementation("androidx.navigation:navigation-compose:2.7.1")
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx.android)
+    implementation(libs.androidx.activity.compose.v180)
+    implementation(platform(libs.androidx.compose.bom.v20230501))
+    implementation(libs.ui)
+    implementation(libs.ui.graphics)
+    implementation(libs.ui.tooling)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.material3)
+    implementation(libs.androidx.navigation.compose.v271)
+    implementation(libs.androidx.runtime.livedata.v151)
+    implementation(libs.androidx.room.compiler)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.05.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.5.1")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit.v121)
+    androidTestImplementation(libs.androidx.espresso.core.v361)
+    androidTestImplementation(platform(libs.androidx.compose.bom.v20240600))
+    androidTestImplementation(libs.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling.v151)
+    debugImplementation(libs.ui.test.manifest)
 
     // Firebase dependencies
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-    implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
-    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.play.services.auth)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.compose.material3:material3:1.2.1") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+}
 
+// Исключение конфликтующих аннотаций
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
 }

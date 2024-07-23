@@ -64,9 +64,9 @@ class TaskViewModel(
     private fun sortTasks() {
         val ascending = _isAscending.value ?: true
         _tasks.value = if (ascending) {
-            _tasks.value?.sortedBy { it.dueDate }
+            _tasks.value?.sortedBy { it.createdAt }
         } else {
-            _tasks.value?.sortedByDescending { it.dueDate }
+            _tasks.value?.sortedByDescending { it.createdAt }
         }
     }
 

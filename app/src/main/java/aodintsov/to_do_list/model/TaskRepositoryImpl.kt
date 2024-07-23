@@ -14,6 +14,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
                 val tasks = result.map { document -> document.toObject<Task>().apply { taskId = document.id } }
                 onSuccess(tasks)
                 Log.d("TaskRepositoryImpl", "Tasks fetched successfully: $tasks")
+
             }
             .addOnFailureListener { exception ->
                 Log.e("TaskRepositoryImpl", "Error fetching tasks", exception)
@@ -27,6 +28,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
             .addOnSuccessListener { documentReference ->
                 task.taskId = documentReference.id
                 Log.d("TaskRepositoryImpl", "Task added with ID: ${documentReference.id}")
+                Log.d("TaskRepositoryImpl", "Adding task with createdAt: ${task.createdAt}")
                 onSuccess()
             }
             .addOnFailureListener { exception ->
