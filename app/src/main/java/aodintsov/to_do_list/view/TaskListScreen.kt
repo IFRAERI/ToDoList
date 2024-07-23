@@ -1,6 +1,7 @@
 package aodintsov.to_do_list.view
 
 import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -227,7 +229,6 @@ fun TaskListScreen(
         )
     }
 }
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(task: Task, onLongClick: () -> Unit) {
@@ -250,21 +251,26 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = task.title, modifier = Modifier.weight(1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = task.title, modifier = Modifier.weight(1f))
+                    if (task.completed && !isExpanded) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Completed",
+                            tint = Color.Green,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
                 IconButton(onClick = { onLongClick() }) {
                     Icon(Icons.Default.MoreVert, contentDescription = "Edit Task")
                 }
             }
-            Text(
-                text = task.description,
-                maxLines = if (isExpanded) Int.MAX_VALUE else 4, // Limit description to 4 lines if not expanded
-            )
-//            Text(
-//                text = "Created on: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(task.taskId.toLong()))}",
-//                style = MaterialTheme.typography.bodySmall,
-//                color = Color.Gray
-//            )
             if (isExpanded) {
+                Text(
+                    text = task.description,
+                    maxLines = if (isExpanded) Int.MAX_VALUE else 4, // Limit description to 4 lines if not expanded
+                )
                 Column {
                     task.subTasks.forEach { subTask ->
                         Row(
@@ -284,40 +290,53 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                         }
                     }
                 }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = task.completed,
-                    onCheckedChange = null // Task completion state is read-only in this context
-                )
-                Text(text = stringResource(id = R.string.completed))
-            }
-            task.dueDate?.let {
-                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(it))
-                Text(text = stringResource(id = R.string.deadline, formattedDate))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = task.completed,
+                        onCheckedChange = null // Task completion state is read-only in this context
+                    )
+                    Text(text = stringResource(id = R.string.completed))
+                }
+                task.dueDate?.let {
+                    val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(it))
+                    Text(text = stringResource(id = R.string.deadline, formattedDate))
+                }
             }
         }
     }
 }
 
 
+
+
 @Composable
 fun ExpandableSection(title: String, initiallyExpanded: Boolean = false, content: @Composable () -> Unit) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
+    val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = !expanded }
                 .padding(8.dp)
-        )
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null,
+                modifier = Modifier.rotate(rotation)
+            )
+        }
         if (expanded) {
             content()
         }
