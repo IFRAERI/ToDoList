@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import aodintsov.to_do_list.model.FirestoreService
 import aodintsov.to_do_list.model.TaskRepositoryImpl
 import aodintsov.to_do_list.navigation.AppNavigation
 import aodintsov.to_do_list.ui.theme.ToDoListTheme
@@ -29,7 +30,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val firestore = FirebaseFirestore.getInstance()
+
+        val firestore = FirestoreService()
         val firebaseAuth = FirebaseAuth.getInstance()
         val repository = TaskRepositoryImpl(firestore)
         val taskViewModelFactory = TaskViewModelFactory(repository, createSavedStateHandle())

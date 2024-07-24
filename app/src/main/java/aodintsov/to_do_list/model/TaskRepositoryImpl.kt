@@ -4,10 +4,10 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 
-class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskRepository {
+class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskRepository {
 
     override fun getTasks(userId: String, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks")
+        firestoreService.firestore.collection("tasks")
             .whereEqualTo("userId", userId)
             .get()
             .addOnSuccessListener { result ->
@@ -23,7 +23,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun addTask(task: Task, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks")
+        firestoreService.firestore.collection("tasks")
             .add(task)
             .addOnSuccessListener { documentReference ->
                 task.taskId = documentReference.id
@@ -38,7 +38,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun updateTask(task: Task, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks").document(task.taskId)
+        firestoreService.firestore.collection("tasks").document(task.taskId)
             .set(task)
             .addOnSuccessListener {
                 Log.d("TaskRepositoryImpl", "Task updated with ID: ${task.taskId}")
@@ -51,7 +51,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun deleteTask(taskId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks").document(taskId)
+        firestoreService.firestore.collection("tasks").document(taskId)
             .delete()
             .addOnSuccessListener {
                 Log.d("TaskRepositoryImpl", "Task deleted with ID: $taskId")
@@ -64,11 +64,11 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun deleteAllTasks(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks")
+        firestoreService.firestore.collection("tasks")
             .whereEqualTo("userId", userId)
             .get()
             .addOnSuccessListener { snapshot ->
-                val batch = firestore.batch()
+                val batch = firestoreService.firestore.batch()
                 for (doc in snapshot.documents) {
                     batch.delete(doc.reference)
                 }
@@ -89,7 +89,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun getAssignedTasks(userId: String, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks")
+        firestoreService.firestore.collection("tasks")
             .whereEqualTo("assignedTo", userId)
             .get()
             .addOnSuccessListener { result ->
@@ -104,7 +104,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun updateSubTask(taskId: String, subTask: SubTask, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks")
+        firestoreService.firestore.collection("tasks")
             .document(taskId)
             .get()
             .addOnSuccessListener { document ->
@@ -119,7 +119,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
                             updatedSubTasks.add(subTask)
                         }
                         task.subTasks = updatedSubTasks
-                        firestore.collection("tasks")
+                        firestoreService.firestore.collection("tasks")
                             .document(taskId)
                             .set(task)
                             .addOnSuccessListener { onSuccess() }
@@ -139,7 +139,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
     }
 
     override fun assignTaskToUser(taskId: String, assignedTo: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestore.collection("tasks")
+        firestoreService.firestore.collection("tasks")
             .document(taskId)
             .get()
             .addOnSuccessListener { document ->
@@ -148,7 +148,7 @@ class TaskRepositoryImpl(private val firestore: FirebaseFirestore) : TaskReposit
                     if (task != null) {
                         task.assignedTo = assignedTo
                         task.delegatedBy = task.userId
-                        firestore.collection("tasks")
+                        firestoreService.firestore.collection("tasks")
                             .document(taskId)
                             .set(task)
                             .addOnSuccessListener { onSuccess() }
