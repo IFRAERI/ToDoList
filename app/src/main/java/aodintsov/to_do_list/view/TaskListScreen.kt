@@ -58,30 +58,35 @@ fun TaskListScreen(
     calendar.time = Date()
     calendar.add(Calendar.DAY_OF_YEAR, -7)
     val sevenDaysAgo = dateFormatter.format(calendar.time)
+    var searchQuery by remember { mutableStateOf("") }
 //    var filteredTasks: List<Task>
 //    val groupedTasks = filteredTasks.groupBy {
 
 
 
 
-    val filteredTasks = when (filterState) {
-        1 -> tasks.filter { it.completed }
-        2 -> tasks.filter { !it.completed }
-        else -> tasks
-    }
-    val highPriorityTasks = filteredTasks.filter { it.priority && !it.completed }
-    val groupedTasks = filteredTasks.groupBy { task ->
-        dateFormatter.format(Date(task.createdAt ?: 0))
-    }.toMutableMap()
-    groupedTasks[today] = (groupedTasks[today] ?: emptyList()) + highPriorityTasks.filterNot { task ->
-        groupedTasks[today]?.contains(task) == true
+    val filteredTasks = tasks.filter {
+        it.title.contains(searchQuery, ignoreCase = true) ||
+                it.description.contains(searchQuery, ignoreCase = true)
+    }.filter { task ->
+        when (filterState) {
+            1 -> task.completed
+            2 -> !task.completed
+            else -> true
+        }
     }
 
+    val groupedTasks = filteredTasks.groupBy { task ->
+        dateFormatter.format(Date(task.createdAt ?: 0))
+    }.filter { (_, groupTasks) ->
+        groupTasks.isNotEmpty()
+    }
 
     LaunchedEffect(Unit) {
         val currentUserId = authViewModel.getCurrentUserId() ?: userId
         taskViewModel.fetchTasks(currentUserId)
     }
+
 
     Scaffold(
         modifier = Modifier
@@ -91,7 +96,7 @@ fun TaskListScreen(
             TopAppBar(
                 title = { Text(stringResource(id = R.string.task_list_title)) },
                 actions = {
-                    var searchQuery by remember { mutableStateOf("") }
+
                     Row {
                         TextField(
                             value = searchQuery,
@@ -267,6 +272,14 @@ fun TaskItem(task: Task, onLongClick: () -> Unit) {
                         text = task.title,
                         modifier = Modifier.weight(1f)
                     )
+                    if (task.priority) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "High Priority",
+                            tint = Color.Red,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                     if (task.completed && !isExpanded) {
                         Icon(
                             imageVector = Icons.Default.Check,
