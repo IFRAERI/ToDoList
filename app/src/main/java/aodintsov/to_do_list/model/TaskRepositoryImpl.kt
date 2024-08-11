@@ -27,12 +27,12 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
             .add(task)
             .addOnSuccessListener { documentReference ->
                 task.taskId = documentReference.id
-                Log.d("TaskRepositoryImpl", "Task added with ID: ${documentReference.id}")
-                Log.d("TaskRepositoryImpl", "Adding task with createdAt: ${task.createdAt}")
+//                Log.d("TaskRepositoryImpl", "Task added with ID: ${documentReference.id}")
+//                Log.d("TaskRepositoryImpl", "Adding task with createdAt: ${task.createdAt}")
                 onSuccess()
             }
             .addOnFailureListener { exception ->
-                Log.e("TaskRepositoryImpl", "Error adding task", exception)
+          //      Log.e("TaskRepositoryImpl", "Error adding task", exception)
                 onFailure(exception)
             }
     }
@@ -41,11 +41,11 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
         firestoreService.firestore.collection("tasks").document(task.taskId)
             .set(task)
             .addOnSuccessListener {
-                Log.d("TaskRepositoryImpl", "Task updated with ID: ${task.taskId}")
+            //    Log.d("TaskRepositoryImpl", "Task updated with ID: ${task.taskId}")
                 onSuccess()
             }
             .addOnFailureListener { exception ->
-                Log.e("TaskRepositoryImpl", "Error updating task", exception)
+             //   Log.e("TaskRepositoryImpl", "Error updating task", exception)
                 onFailure(exception)
             }
     }
@@ -54,11 +54,11 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
         firestoreService.firestore.collection("tasks").document(taskId)
             .delete()
             .addOnSuccessListener {
-                Log.d("TaskRepositoryImpl", "Task deleted with ID: $taskId")
+            //    Log.d("TaskRepositoryImpl", "Task deleted with ID: $taskId")
                 onSuccess()
             }
             .addOnFailureListener { exception ->
-                Log.e("TaskRepositoryImpl", "Error deleting task", exception)
+           //     Log.e("TaskRepositoryImpl", "Error deleting task", exception)
                 onFailure(exception)
             }
     }
@@ -74,16 +74,16 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
                 }
                 batch.commit()
                     .addOnSuccessListener {
-                        Log.d("TaskRepositoryImpl", "All tasks deleted for user: $userId")
+                    //    Log.d("TaskRepositoryImpl", "All tasks deleted for user: $userId")
                         onSuccess()
                     }
                     .addOnFailureListener { exception ->
-                        Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
+                     //   Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
                         onFailure(exception)
                     }
             }
             .addOnFailureListener { exception ->
-                Log.e("TaskRepositoryImpl", "Error fetching tasks for deletion", exception)
+               // Log.e("TaskRepositoryImpl", "Error fetching tasks for deletion", exception)
                 onFailure(exception)
             }
     }
@@ -95,10 +95,10 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
             .addOnSuccessListener { result ->
                 val tasks = result.map { document -> document.toObject<Task>().apply { taskId = document.id } }
                 onSuccess(tasks)
-                Log.d("TaskRepositoryImpl", "Assigned tasks fetched successfully: $tasks")
+              //  Log.d("TaskRepositoryImpl", "Assigned tasks fetched successfully: $tasks")
             }
             .addOnFailureListener { exception ->
-                Log.e("TaskRepositoryImpl", "Error fetching assigned tasks", exception)
+             //   Log.e("TaskRepositoryImpl", "Error fetching assigned tasks", exception)
                 onFailure(exception)
             }
     }

@@ -16,13 +16,15 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+//import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Snackbar
+//import androidx.compose.material3.SnackbarHost
+//import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -31,8 +33,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+//import androidx.compose.runtime.remember
+//import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -44,14 +46,16 @@ import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
-import kotlinx.coroutines.launch
+//import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
+//import androidx.compose.ui.tooling.preview.Preview
+//import androidx.navigation.compose.rememberNavController
 import aodintsov.to_do_list.R
-@OptIn(ExperimentalMaterial3Api::class)
+//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskScreen(
     navController: NavController,
@@ -70,11 +74,19 @@ fun AddEditTaskScreen(
     var assignedTo by rememberSaveable { mutableStateOf("") }
     var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
     var completionDate by rememberSaveable { mutableStateOf<Long?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    //val snackbarHostState = remember { SnackbarHostState() }
+    //val scope = rememberCoroutineScope()
+    //val emptyTaskErr = R.string.empty_fields_message
+    var showSnackbar by rememberSaveable { mutableStateOf(false) }
+    var snackbarMessage by rememberSaveable { mutableStateOf("") }
+    val emptyFieldsError = stringResource(R.string.empty_fields_message)
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+
+
 
     LaunchedEffect(taskId) {
-        Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")
+      //  Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")
         taskViewModel.fetchTasks(userId)
     }
 
@@ -84,7 +96,7 @@ fun AddEditTaskScreen(
         if (tasks != null && taskId != null && !taskLoaded) {
             val task = taskViewModel.getTaskById(taskId)
             if (task != null) {
-                Log.d("AddEditTaskScreen", "Task found: ${task.title}, ${task.description}")
+              //  Log.d("AddEditTaskScreen", "Task found: ${task.title}, ${task.description}")
                 taskTitle = task.title
                 taskDescription = task.description
                 isCompleted = task.completed
@@ -95,7 +107,7 @@ fun AddEditTaskScreen(
                 completionDate = task.completionDate
                 taskLoaded = true
             } else {
-                Log.d("AddEditTaskScreen", "Task not found with taskId: $taskId")
+              //  Log.d("AddEditTaskScreen", "Task not found with taskId: $taskId")
             }
         }
     }
@@ -120,7 +132,7 @@ fun AddEditTaskScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 0.dp)
+            .padding(horizontal = 2.dp)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
             .background(MaterialTheme.colorScheme.background)
@@ -147,7 +159,9 @@ fun AddEditTaskScreen(
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 ),
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth() // Занять всю ширину
             )
 
             TextField(
@@ -160,7 +174,9 @@ fun AddEditTaskScreen(
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 ),
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth() // Занять всю ширину
             )
 
             Row(
@@ -265,6 +281,7 @@ fun AddEditTaskScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
+                 BannerAdView(modifier = Modifier.fillMaxWidth())
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -273,9 +290,12 @@ fun AddEditTaskScreen(
                 Button(
                     onClick = {
                         if (taskTitle.isBlank() || taskDescription.isBlank()) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(R.string.empty_fields_message.toString())
-                            }
+//                            scope.launch {
+//                               snackbarHostState.showSnackbar(emptyTaskErr.toString())
+//                                //snackbarMessage = emptyTaskErr
+//                            }
+                            snackbarMessage = emptyFieldsError
+                            showSnackbar = true
                         } else {
                             subTasks = subTasks.filter { it.title.isNotBlank() }
                             if (taskId == null) {
@@ -320,8 +340,7 @@ fun AddEditTaskScreen(
                 if (taskId != null) {
                     Button(
                         onClick = {
-                            taskViewModel.deleteTask(taskId, userId)
-                            navController.navigateUp()
+                            showDeleteDialog = true
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -330,13 +349,50 @@ fun AddEditTaskScreen(
                 }
             }
         }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text(text = stringResource(R.string.confirm_delete_title)) },
+                text = { Text(text = stringResource(R.string.confirm_delete_message)) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            taskViewModel.deleteTask(taskId!!, userId)
+                            navController.navigateUp()
+                            showDeleteDialog = false
+                        }
+                    ) {
+                        Text(text = stringResource(R.string.confirm_delete))
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDeleteDialog = false }) {
+                        Text(text = stringResource(R.string.cancel_delete))
+                    }
+                }
+            )
+        }
+        if (showSnackbar) {
+            Snackbar(
+                action = {
+                    Button(onClick = { showSnackbar = false }) {
+                        Text(stringResource(R.string.dismiss))
+                    }
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(text = snackbarMessage)
+            }
+        }
     }
 }
+
+//        SnackbarHost(
+//            hostState = snackbarHostState,
+//            modifier = Modifier.align(Alignment.BottomCenter)
+//        )
+//    }
+//}
 
 @Composable
 fun MyDeadlineText(deadline: Long?) {

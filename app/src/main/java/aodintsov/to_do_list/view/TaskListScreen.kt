@@ -85,6 +85,7 @@ fun TaskListScreen(
     LaunchedEffect(Unit) {
         val currentUserId = authViewModel.getCurrentUserId() ?: userId
         taskViewModel.fetchTasks(currentUserId)
+        Log.d("TaskListScreen", "Tasks fetched for user: $currentUserId")
     }
 
 
@@ -204,7 +205,10 @@ fun TaskListScreen(
 //                            })
                         }
                     }
-                }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Добавляем баннерную рекламу, если список задач не пуст
+                   BannerAdView(modifier = Modifier.fillMaxWidth())
+              }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { navController.navigate("addEditTask") },

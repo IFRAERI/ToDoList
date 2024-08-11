@@ -79,6 +79,11 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.material.icons.extended)
     //implementation (com.google.accompanist:accompanist-navigation-animation:0.35.1-alpha)
+    implementation (libs.firebase.ads)
+
+    implementation (libs.play.services.ads)
+
+
 
 
     implementation("androidx.compose.material3:material3:1.2.1") {

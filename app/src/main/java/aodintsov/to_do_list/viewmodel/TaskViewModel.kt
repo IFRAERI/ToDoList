@@ -5,10 +5,12 @@ import androidx.lifecycle.*
 import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.model.TaskRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class TaskViewModel(
     private val repository: TaskRepository,
+    private val authViewModel: AuthViewModel,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _tasks = MutableLiveData<List<Task>>()
@@ -25,17 +27,21 @@ class TaskViewModel(
     }
 
     fun fetchTasks(userId: String) {
-        viewModelScope.launch {
-            repository.getTasks(userId, onSuccess = { taskList ->
-                allTasks = taskList
-                _tasks.value = taskList
-                Log.d("TaskViewModel", "Fetched tasks: ${taskList.map { it.taskId }}")
-                Log.d("TaskViewModel", "All tasks after fetch: $allTasks")
-                savedStateHandle.set("tasks", taskList)
-            }, onFailure = {
-                _tasks.value = emptyList() // Set empty list on failure
-                Log.d("TaskViewModel", "Failed to fetch tasks")
-            })
+        if (userId.isNotEmpty()) {
+            viewModelScope.launch {
+                repository.getTasks(userId, onSuccess = { taskList ->
+                    allTasks = taskList
+                    _tasks.value = taskList
+                    Log.d("TaskViewModel", "Fetched tasks: ${taskList.map { it.taskId }}")
+                    Log.d("TaskViewModel", "All tasks after fetch: $allTasks")
+                    savedStateHandle.set("tasks", taskList)
+                }, onFailure = {
+                    _tasks.value = emptyList() // Set empty list on failure
+                    Log.d("TaskViewModel", "Failed to fetch tasks")
+                })
+            }
+        } else {
+            Log.e("TaskViewModel", "Error: UserId is empty")
         }
     }
 
@@ -76,30 +82,38 @@ class TaskViewModel(
         sortTasks()
     }
 
-    fun deleteAllTasks(userId: String) {
-        viewModelScope.launch {
-            repository.deleteAllTasks(userId, onSuccess = {
-                _tasks.value = emptyList()
-                allTasks = emptyList()
-                savedStateHandle.set("tasks", emptyList<Task>())
-                Log.d("TaskViewModel", "All tasks after delete: $allTasks")
-            }, onFailure = {
-                // Handle error
-            })
-        }
-    }
+//    fun deleteAllTasks(userId: String) {
+//        viewModelScope.launch {
+//            repository.deleteAllTasks(userId, onSuccess = {
+//                _tasks.value = emptyList()
+//                allTasks = emptyList()
+//                savedStateHandle.set("tasks", emptyList<Task>())
+//                Log.d("TaskViewModel", "All tasks after delete: $allTasks")
+//            }, onFailure = {
+//                // Handle error
+//            })
+//        }
+//    }
 
     fun addTask(task: Task) {
-        val taskId = System.currentTimeMillis().toString() // Use timestamp as taskId
-        val newTask = task.copy(taskId = taskId)
-        viewModelScope.launch {
-            repository.addTask(newTask, onSuccess = {
-                Log.d("TaskViewModel", "Task added successfully: $newTask")
-                fetchTasks(task.userId)
-            }, onFailure = {
-                Log.e("TaskViewModel", "Failed to add task", it)
-                // Handle error
-            })
+        //val currentUser = FirebaseAuth.getInstance().currentUser
+        //if (currentUser != null) {
+
+            val userId = authViewModel.getCurrentUserId()
+        if (userId != null) {
+            val taskId = System.currentTimeMillis().toString() // Use timestamp as taskId
+            val newTask = task.copy(taskId = taskId, userId = userId)
+            viewModelScope.launch {
+                repository.addTask(newTask, onSuccess = {
+                    Log.d("TaskViewModel", "Task added successfully: $newTask")
+                    fetchTasks(userId)
+                }, onFailure = {
+                    Log.e("TaskViewModel", "Failed to add task", it)
+                    // Handle error
+                })
+            }
+        } else {
+            Log.e("TaskViewModel", "Error: User is not authenticated")
         }
     }
 
@@ -131,16 +145,16 @@ class TaskViewModel(
         return task
     }
 
-    fun assignTaskToUser(taskId: String, assignedTo: String) {
-        viewModelScope.launch {
-            repository.assignTaskToUser(taskId, assignedTo, onSuccess = {
-                // Refresh tasks to reflect assignment
-                fetchTasks(assignedTo)
-            }, onFailure = {
-                // Handle error
-            })
-        }
-    }
+//    fun assignTaskToUser(taskId: String, assignedTo: String) {
+//        viewModelScope.launch {
+//            repository.assignTaskToUser(taskId, assignedTo, onSuccess = {
+//                // Refresh tasks to reflect assignment
+//                fetchTasks(assignedTo)
+//            }, onFailure = {
+//                // Handle error
+//            })
+//        }
+//    }
 
     fun updateSubTask(taskId: String, subTask: SubTask) {
         viewModelScope.launch {
@@ -156,17 +170,17 @@ class TaskViewModel(
         }
     }
 
-    fun getAssignedTasks(userId: String) {
-        viewModelScope.launch {
-            repository.getAssignedTasks(userId, onSuccess = { taskList ->
-                allTasks = taskList
-                _tasks.value = taskList
-                Log.d("TaskViewModel", "Fetched assigned tasks: ${taskList.map { it.taskId }}")
-                savedStateHandle.set("tasks", taskList)
-            }, onFailure = {
-                _tasks.value = emptyList() // Set empty list on failure
-                Log.d("TaskViewModel", "Failed to fetch assigned tasks")
-            })
-        }
-    }
+//    fun getAssignedTasks(userId: String) {
+//        viewModelScope.launch {
+//            repository.getAssignedTasks(userId, onSuccess = { taskList ->
+//                allTasks = taskList
+//                _tasks.value = taskList
+//                Log.d("TaskViewModel", "Fetched assigned tasks: ${taskList.map { it.taskId }}")
+//                savedStateHandle.set("tasks", taskList)
+//            }, onFailure = {
+//                _tasks.value = emptyList() // Set empty list on failure
+//                Log.d("TaskViewModel", "Failed to fetch assigned tasks")
+//            })
+//        }
+//    }
 }

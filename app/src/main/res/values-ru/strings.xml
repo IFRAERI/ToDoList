@@ -39,5 +39,9 @@
     <string name="registration_title">Регистрация</string>
     <string name="password_length_error">Пароль должен содержать не менее 8 символов</string>
     <string name="registration_failed_error">Регистрация не удалась. Пожалуйста, попробуйте снова</string>
+    <string name="unresolved_tasks_title">Нерешенные задачи</string>
+    <string name="unresolved_tasks_text">У вас есть %1$d нерешенных задач</string>
+    <string name="priority">Высокий приоритет</string>
+    <string name="remove_deadline">Удалить дедлайн</string>
 
 </resources>

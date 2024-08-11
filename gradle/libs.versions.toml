@@ -5,8 +5,11 @@ androidxComposeBom = "2024.06.00"
 androidxJunit = "1.2.1"
 composeBomVersion = "2023.05.01"
 espressoCoreVersion = "3.6.1"
+firebaseAds = "23.2.0"
 firebaseBom = "33.1.2"
 firebaseFirestoreKtx = "25.0.0"
+googleServices = "4.4.2"
+gradle = "7.4.2"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -19,6 +22,7 @@ lifecycleRuntimeKtxAndroid = "2.8.3"
 material3 = "1.2.0-alpha06"
 materialIconsExtended = "1.6.8"
 navigationComposeVersion = "2.7.1"
+playServicesAds = "23.2.0"
 playServicesAuth = "21.2.0"
 runtimeLivedata = "1.6.8"
 navigationRuntimeKtx = "2.7.7"
@@ -46,9 +50,12 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-navigation-compose-v271 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-runtime-livedata-v151 = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedataVersion" }
 androidx-ui-tooling-v151 = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiToolingVersion" }
+firebase-ads = { module = "com.google.firebase:firebase-ads", version.ref = "firebaseAds" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -68,6 +75,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-compose-material = { group = "androidx.compose.material", name = "material", version.ref = "composeMaterial" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "uiGraphics" }

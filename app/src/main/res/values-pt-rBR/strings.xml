@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lista de Tarefas</string>
+    <string name="task_list_title">Lista de Tarefas</string>
+    <string name="search_label">Pesquisar</string>
+    <string name="filter_tasks">Filtrar Tarefas</string>
+    <string name="sort">Ordenar</string>
+    <string name="logout">Sair</string>
+    <string name="no_tasks_available">Nenhuma tarefa disponível.</string>
+    <string name="add_task">Adicionar Tarefa</string>
+    <string name="confirm_logout">Confirmar Saída</string>
+    <string name="logout_message">Você tem certeza de que deseja sair?</string>
+    <string name="logout_confirm">Sair</string>
+    <string name="logout_cancel">Cancelar</string>
+    <string name="completed">Concluído</string>
+    <string name="deadline">Prazo: %1$s</string>
+    <string name="add_edit_task_title">Adicionar/Editar Tarefa</string>
+    <string name="title_label">Título</string>
+    <string name="description_label">Descrição</string>
+    <string name="set_deadline">Definir Prazo</string>
+    <string name="subtasks_label">Subtarefas:</string>
+    <string name="add_subtask">Adicionar Subtarefa</string>
+    <string name="save_task">Salvar Tarefa</string>
+    <string name="delete_task">Excluir Tarefa</string>
+    <string name="empty_fields_message">O Título e a Descrição não podem estar vazios</string>
+    <string name="no_deadline">Sem prazo</string>
+    <string name="login_screen_title">Entrar</string>
+    <string name="email_label">E-mail</string>
+    <string name="password_label">Senha</string>
+    <string name="login_button">Entrar</string>
+    <string name="register_button">Registrar</string>
+    <string name="forgot_password_button">Esqueci minha Senha</string>
+    <string name="empty_fields_error">O e-mail e a senha não podem estar vazios.</string>
+    <string name="login_failed_error">Falha ao entrar. Por favor, tente novamente.</string>
+    <string name="reset_email_sent">E-mail de redefinição de senha enviado!</string>
+    <string name="reset_email_failed">Falha ao enviar o e-mail de redefinição de senha: %1$s</string>
+    <string name="enter_email_for_reset">Por favor, insira seu e-mail</string>
+    <string name="dismiss">Dispensar</string>
+    <string name="unknown_error">Erro desconhecido</string>
+    <string name="registration_title">Registro</string>
+    <string name="password_length_error">A senha deve conter pelo menos 8 caracteres</string>
+    <string name="registration_failed_error">Falha no registro. Por favor, tente novamente</string>
+    <string name="priority">Alta prioridade</string>
+    <string name="remove_deadline">Remover prazo</string>
+    <string name="unresolved_tasks_title">Tarefas Pendentes</string>
+    <string name="unresolved_tasks_text">Você tem %1$d tarefas pendentes</string>
+</resources>

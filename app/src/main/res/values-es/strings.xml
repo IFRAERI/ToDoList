@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lista de Tareas</string>
+    <string name="task_list_title">Lista de Tareas</string>
+    <string name="search_label">Buscar</string>
+    <string name="filter_tasks">Filtrar Tareas</string>
+    <string name="sort">Ordenar</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="no_tasks_available">No hay tareas disponibles.</string>
+    <string name="add_task">Agregar Tarea</string>
+    <string name="confirm_logout">Confirmar Cierre de Sesión</string>
+    <string name="logout_message">¿Estás seguro de que deseas cerrar sesión?</string>
+    <string name="logout_confirm">Cerrar sesión</string>
+    <string name="logout_cancel">Cancelar</string>
+    <string name="completed">Completado</string>
+    <string name="deadline">Fecha límite: %1$s</string>
+    <string name="add_edit_task_title">Agregar/Editar Tarea</string>
+    <string name="title_label">Título</string>
+    <string name="description_label">Descripción</string>
+    <string name="set_deadline">Establecer Fecha Límite</string>
+    <string name="subtasks_label">Subtareas:</string>
+    <string name="add_subtask">Agregar Subtarea</string>
+    <string name="save_task">Guardar Tarea</string>
+    <string name="delete_task">Eliminar Tarea</string>
+    <string name="empty_fields_message">El Título y la Descripción no pueden estar vacíos</string>
+    <string name="no_deadline">Sin fecha límite</string>
+    <string name="login_screen_title">Iniciar Sesión</string>
+    <string name="email_label">Correo Electrónico</string>
+    <string name="password_label">Contraseña</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="register_button">Registrarse</string>
+    <string name="forgot_password_button">Olvidé mi Contraseña</string>
+    <string name="empty_fields_error">El correo electrónico y la contraseña no pueden estar vacíos.</string>
+    <string name="login_failed_error">Error al iniciar sesión. Por favor, inténtalo de nuevo.</string>
+    <string name="reset_email_sent">¡Correo de restablecimiento de contraseña enviado!</string>
+    <string name="reset_email_failed">Error al enviar el correo de restablecimiento de contraseña: %1$s</string>
+    <string name="enter_email_for_reset">Por favor, introduce tu correo electrónico</string>
+    <string name="dismiss">Descartar</string>
+    <string name="unknown_error">Error desconocido</string>
+    <string name="registration_title">Registro</string>
+    <string name="password_length_error">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="registration_failed_error">Error al registrarse. Por favor, inténtalo de nuevo</string>
+    <string name="priority">Alta prioridad</string>
+    <string name="remove_deadline">Eliminar fecha límite</string>
+    <string name="unresolved_tasks_title">Tareas Sin Resolver</string>
+    <string name="unresolved_tasks_text">Tienes %1$d tareas sin resolver</string>
+</resources>
