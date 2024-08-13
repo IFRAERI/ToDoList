@@ -13,6 +13,7 @@ data class Task(
     var delegatedBy: String = "", // Добавлено поле для хранения информации о том, от кого задача была делегирована
     var subTasks: List<SubTask> = listOf(), // Добавлено поле для подзадач
     val createdAt: Long = System.currentTimeMillis(), // Добавлено поле для хранения даты создания задачи
-    var completionDate: Long? = null
+    var completionDate: Long? = null,
+    var archived: Boolean = false // Добавлено поле для записи задачи в архив
    // val createdAt: Long = System.currentTimeMillis()
 )

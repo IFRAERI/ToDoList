@@ -63,30 +63,30 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
             }
     }
 
-    override fun deleteAllTasks(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestoreService.firestore.collection("tasks")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val batch = firestoreService.firestore.batch()
-                for (doc in snapshot.documents) {
-                    batch.delete(doc.reference)
-                }
-                batch.commit()
-                    .addOnSuccessListener {
-                    //    Log.d("TaskRepositoryImpl", "All tasks deleted for user: $userId")
-                        onSuccess()
-                    }
-                    .addOnFailureListener { exception ->
-                     //   Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
-                        onFailure(exception)
-                    }
-            }
-            .addOnFailureListener { exception ->
-               // Log.e("TaskRepositoryImpl", "Error fetching tasks for deletion", exception)
-                onFailure(exception)
-            }
-    }
+//    override fun deleteAllTasks(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+//        firestoreService.firestore.collection("tasks")
+//            .whereEqualTo("userId", userId)
+//            .get()
+//            .addOnSuccessListener { snapshot ->
+//                val batch = firestoreService.firestore.batch()
+//                for (doc in snapshot.documents) {
+//                    batch.delete(doc.reference)
+//                }
+//                batch.commit()
+//                    .addOnSuccessListener {
+//                    //    Log.d("TaskRepositoryImpl", "All tasks deleted for user: $userId")
+//                        onSuccess()
+//                    }
+//                    .addOnFailureListener { exception ->
+//                     //   Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
+//                        onFailure(exception)
+//                    }
+//            }
+//            .addOnFailureListener { exception ->
+//               // Log.e("TaskRepositoryImpl", "Error fetching tasks for deletion", exception)
+//                onFailure(exception)
+//            }
+//    }
 
     override fun getAssignedTasks(userId: String, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit) {
         firestoreService.firestore.collection("tasks")

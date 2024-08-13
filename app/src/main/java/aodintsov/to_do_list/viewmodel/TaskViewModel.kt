@@ -25,6 +25,26 @@ class TaskViewModel(
         allTasks = _tasks.value ?: emptyList()
         Log.d("TaskViewModel", "Initial allTasks: $allTasks")
     }
+    fun archiveTask(task: Task){
+        val updatedTask = task.copy(archived = true)
+        updateTask(updatedTask)
+    }
+    fun refreshTasks() {
+        _tasks.value = allTasks // Принудительное обновление состояния списка
+    }
+
+    fun unarchiveTask(task: Task){
+        val updatedTask = task.copy(archived = false)
+        updateTask(updatedTask)
+    }
+    fun filterTasks(showArchived: Boolean) {
+        _tasks.value = if (showArchived) {
+            allTasks.filter { it.archived }
+        } else {
+            allTasks.filter { !it.archived }
+        }
+    }
+
 
     fun fetchTasks(userId: String) {
         if (userId.isNotEmpty()) {
