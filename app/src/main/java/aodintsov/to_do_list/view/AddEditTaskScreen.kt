@@ -1,61 +1,28 @@
 package aodintsov.to_do_list.view
 
-import android.app.DatePickerDialog
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-//import androidx.compose.foundation.layout.BoxScopeInstance.align
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-//import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
-//import androidx.compose.material3.SnackbarHost
-//import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-//import androidx.compose.runtime.remember
-//import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import aodintsov.to_do_list.R
 import aodintsov.to_do_list.model.SubTask
-import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
-//import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.stringResource
-//import androidx.compose.ui.tooling.preview.Preview
-//import androidx.navigation.compose.rememberNavController
-import aodintsov.to_do_list.R
-//@OptIn(ExperimentalMaterial3Api::class)
+import aodintsov.to_do_list.view.components.*
+import java.util.*
+import aodintsov.to_do_list.model.Task
+
+
 @Composable
 fun AddEditTaskScreen(
     navController: NavController,
@@ -64,259 +31,126 @@ fun AddEditTaskScreen(
     taskViewModelFactory: TaskViewModelFactory,
     modifier: Modifier = Modifier
 ) {
-    var priorityTask by rememberSaveable { mutableStateOf(false) }
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     var taskTitle by rememberSaveable { mutableStateOf("") }
     var taskDescription by rememberSaveable { mutableStateOf("") }
-    var taskLoaded by rememberSaveable { mutableStateOf(false) }
+    var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
+    var isPriority by rememberSaveable { mutableStateOf(false) }
     var isCompleted by rememberSaveable { mutableStateOf(false) }
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
     var assignedTo by rememberSaveable { mutableStateOf("") }
-    var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
-    var completionDate by rememberSaveable { mutableStateOf<Long?>(null) }
-    //val snackbarHostState = remember { SnackbarHostState() }
-    //val scope = rememberCoroutineScope()
-    //val emptyTaskErr = R.string.empty_fields_message
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var showSnackbar by rememberSaveable { mutableStateOf(false) }
     var snackbarMessage by rememberSaveable { mutableStateOf("") }
     val emptyFieldsError = stringResource(R.string.empty_fields_message)
-    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+    deadline?.let { calendar.timeInMillis = it }
 
-
-
-
+    // Fetch tasks when screen is loaded
     LaunchedEffect(taskId) {
-      //  Log.d("AddEditTaskScreen", "LaunchedEffect triggered with taskId: $taskId")
         taskViewModel.fetchTasks(userId)
     }
 
+    // Load task details if taskId is not null
     val tasks by taskViewModel.tasks.observeAsState()
-
     LaunchedEffect(tasks) {
-        if (tasks != null && taskId != null && !taskLoaded) {
+        if (tasks != null && taskId != null) {
             val task = taskViewModel.getTaskById(taskId)
-            if (task != null) {
-              //  Log.d("AddEditTaskScreen", "Task found: ${task.title}, ${task.description}")
-                taskTitle = task.title
-                taskDescription = task.description
-                isCompleted = task.completed
-                deadline = task.dueDate
-                assignedTo = task.assignedTo
-                subTasks = task.subTasks
-                priorityTask = task.priority
-                completionDate = task.completionDate
-                taskLoaded = true
-            } else {
-              //  Log.d("AddEditTaskScreen", "Task not found with taskId: $taskId")
+            task?.let {
+                taskTitle = it.title
+                taskDescription = it.description
+                isCompleted = it.completed
+                deadline = it.dueDate
+                assignedTo = it.assignedTo
+                subTasks = it.subTasks
+                isPriority = it.priority
             }
         }
     }
 
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    deadline?.let { calendar.timeInMillis = it }
-   // val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            calendar.set(year, month, dayOfMonth)
-            deadline = calendar.timeInMillis
-            priorityTask = true // Автоматически устанавливаем высокий приоритет при установке дедлайна
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
-
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 2.dp)
+            .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
-            .navigationBarsPadding()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Text(
-                text = stringResource(R.string.add_edit_task_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
+        Column(modifier = Modifier.fillMaxSize()) {
+            TitleInput(
+                title = taskTitle,
+                onTitleChange = { taskTitle = it }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TextField(
-                value = taskTitle,
-                onValueChange = { taskTitle = it },
-                label = { Text(stringResource(R.string.title_label)) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                ),
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth() // Занять всю ширину
+            DescriptionInput(
+                description = taskDescription,
+                onDescriptionChange = { taskDescription = it }
             )
 
-            TextField(
-                value = taskDescription,
-                onValueChange = { taskDescription = it },
-                label = { Text(stringResource(R.string.description_label)) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                ),
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth() // Занять всю ширину
+            CompletionCheckbox(
+                isCompleted = isCompleted,
+                subTasks = subTasks,
+                onCompletionChange = { isCompleted = it }
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                Checkbox(
-                    checked = isCompleted,
-                    onCheckedChange = {
-                        if (subTasks.all { it.completed } || subTasks.isEmpty()) {
-                            isCompleted = it
-                            completionDate = if (it) System.currentTimeMillis() else null
-                        }
-                    },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.primary,
-                        uncheckedColor = MaterialTheme.colorScheme.onSurface
+            PriorityCheckbox(
+                isPriority = isPriority,
+                onPriorityChange = { isPriority = it },
+                isDeadlineSet = deadline != null
+            )
+
+            DeadlinePicker(
+                deadline = deadline,
+                onDatePick = { selectedCalendar ->
+                    deadline = selectedCalendar.timeInMillis
+                    isPriority = true // Установка высокого приоритета при наличии дедлайна
+                },
+                onClearDeadline = {
+                    deadline = null
+                    isPriority = false
+                }
+            )
+
+            SubTasksSection(
+                subTasks = subTasks,
+                onAddSubTask = {
+                    subTasks = subTasks + SubTask(
+                        subTaskId = System.currentTimeMillis().toString(),
+                        title = "",
+                        completed = false
                     )
-                )
-                Text(text = stringResource(R.string.completed), color = MaterialTheme.colorScheme.onBackground)
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                Checkbox(
-                    checked = priorityTask,
-                    onCheckedChange = { if (deadline == null) priorityTask = it },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.primary,
-                        uncheckedColor = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-                Text(
-                    text = stringResource(R.string.priority),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+                },
+                onSubTasksChange = { updatedSubTasks ->
+                    subTasks = updatedSubTasks
+                }
+            )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                MyDeadlineText(deadline)
-                Spacer(modifier = Modifier.weight(1f))
-                Button(onClick = {
-                    if (deadline != null) {
-                        deadline = null
-                        priorityTask = false
+            ActionButtons(
+                taskId = taskId,
+                taskTitle = taskTitle,
+                taskDescription = taskDescription,
+                userId = userId,
+                isCompleted = isCompleted,
+                deadline = deadline,
+                assignedTo = assignedTo,
+                subTasks = subTasks,
+                priorityTask = isPriority,
+                navController = navController,
+                taskViewModel = taskViewModel,
+                onShowSnackbar = { message ->
+                    snackbarMessage = message
+                    showSnackbar = true
+                },
+                onSaveTask = {
+                    if (taskTitle.isBlank() || taskDescription.isBlank()) {
+                        snackbarMessage = emptyFieldsError
+                        showSnackbar = true
                     } else {
-                        datePickerDialog.show()
-                    }
-                }) {
-                    Text(text = if (deadline != null) stringResource(R.string.remove_deadline) else stringResource(R.string.set_deadline))
-                }
-            }
-
-            Text(text = stringResource(R.string.subtasks_label), color = MaterialTheme.colorScheme.onBackground)
-            subTasks.forEachIndexed { index, subTask ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextField(
-                        value = subTask.title,
-                        onValueChange = {
-                            subTasks = subTasks.toMutableList().apply {
-                                set(index, subTask.copy(title = it))
-                            }
-                        },
-                        label = { Text(stringResource(R.string.subtasks_label, index + 1)) },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        ),
-                        modifier = Modifier
-                            .padding(vertical = 4.dp)
-                            .weight(1f)
-                    )
-                    Checkbox(
-                        checked = subTask.completed,
-                        onCheckedChange = {
-                            subTasks = subTasks.toMutableList().apply {
-                                set(index, subTask.copy(completed = it))
-                            }
-                        },
-                        enabled = subTask.title.isNotBlank(),
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-                }
-            }
-            Button(onClick = {
-                subTasks = subTasks + SubTask(
-                    subTaskId = System.currentTimeMillis().toString(),
-                    title = "",
-                    completed = false
-                )
-            }) {
-                Text(text = stringResource(R.string.add_subtask))
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-                 BannerAdView(modifier = Modifier.fillMaxWidth())
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = {
-                        if (taskTitle.isBlank() || taskDescription.isBlank()) {
-//                            scope.launch {
-//                               snackbarHostState.showSnackbar(emptyTaskErr.toString())
-//                                //snackbarMessage = emptyTaskErr
-//                            }
-                            snackbarMessage = emptyFieldsError
-                            showSnackbar = true
-                        } else {
-                            subTasks = subTasks.filter { it.title.isNotBlank() }
-                            if (taskId == null) {
-                                taskViewModel.addTask(
-                                    Task(
-                                        taskId = System.currentTimeMillis().toString(),
-                                        title = taskTitle,
-                                        description = taskDescription,
-                                        userId = userId,
-                                        completed = isCompleted,
-                                        dueDate = deadline,
-                                        assignedTo = assignedTo,
-                                        subTasks = subTasks,
-                                        priority = priorityTask,
-                                        createdAt = System.currentTimeMillis(),
-                                        completionDate = if (isCompleted) System.currentTimeMillis() else null
-                                    )
-                                )
-                            } else {
-                                val updatedTask = Task(
-                                    taskId = taskId,
+                        subTasks = subTasks.filter { it.title.isNotBlank() }
+                        if (taskId == null) {
+                            taskViewModel.addTask(
+                                Task(
+                                    taskId = System.currentTimeMillis().toString(),
                                     title = taskTitle,
                                     description = taskDescription,
                                     userId = userId,
@@ -324,31 +158,45 @@ fun AddEditTaskScreen(
                                     dueDate = deadline,
                                     assignedTo = assignedTo,
                                     subTasks = subTasks,
-                                    priority = priorityTask,
+                                    priority = isPriority,
+                                    createdAt = System.currentTimeMillis(),
                                     completionDate = if (isCompleted) System.currentTimeMillis() else null
                                 )
-                                taskViewModel.updateTask(updatedTask)
-                            }
-                            navController.navigateUp()
+                            )
+                        } else {
+                            val updatedTask = Task(
+                                taskId = taskId,
+                                title = taskTitle,
+                                description = taskDescription,
+                                userId = userId,
+                                completed = isCompleted,
+                                dueDate = deadline,
+                                assignedTo = assignedTo,
+                                subTasks = subTasks,
+                                priority = isPriority,
+                                completionDate = if (isCompleted) System.currentTimeMillis() else null
+                            )
+                            taskViewModel.updateTask(updatedTask)
                         }
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = stringResource(R.string.save_task))
-                }
-
-                if (taskId != null) {
-                    Button(
-                        onClick = {
-                            showDeleteDialog = true
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(text = stringResource(R.string.delete_task))
+                        navController.navigateUp()
                     }
                 }
+            )
+
+
+            if (showSnackbar) {
+            Snackbar(
+                action = {
+                    Button(onClick = { showSnackbar = false }) {
+                        Text(stringResource(R.string.dismiss))
+                    }
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(text = snackbarMessage)
             }
         }
+
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
@@ -372,39 +220,5 @@ fun AddEditTaskScreen(
                 }
             )
         }
-        if (showSnackbar) {
-            Snackbar(
-                action = {
-                    Button(onClick = { showSnackbar = false }) {
-                        Text(stringResource(R.string.dismiss))
-                    }
-                },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = snackbarMessage)
-            }
-        }
     }
-}
-
-//        SnackbarHost(
-//            hostState = snackbarHostState,
-//            modifier = Modifier.align(Alignment.BottomCenter)
-//        )
-//    }
-//}
-
-@Composable
-fun MyDeadlineText(deadline: Long?) {
-   // val context = LocalContext.current
-    val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
-    val deadlineText = deadline?.let {
-        dateFormatter.format(it)
-    } ?: stringResource(id = R.string.no_deadline)
-
-    Text(
-        text = stringResource(id = R.string.deadline, deadlineText),
-        color = MaterialTheme.colorScheme.onBackground
-    )
-}
+}}

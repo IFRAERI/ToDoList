@@ -11,4 +11,6 @@ interface TaskRepository {
     fun getAssignedTasks(userId: String, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit)
     fun updateSubTask(taskId: String, subTask: SubTask, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
     fun assignTaskToUser(taskId: String, assignedTo: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+    fun getDeferredTasks(userId: String, currentTime: Long, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit)
+    fun activateDeferredTask(taskId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 }

@@ -14,6 +14,8 @@ data class Task(
     var subTasks: List<SubTask> = listOf(), // Добавлено поле для подзадач
     val createdAt: Long = System.currentTimeMillis(), // Добавлено поле для хранения даты создания задачи
     var completionDate: Long? = null,
-    var archived: Boolean = false // Добавлено поле для записи задачи в архив
+    var archived: Boolean = false, // Добавлено поле для записи задачи в архив
+    var activationTime: Long? = null, // Время активации задачи
+    var isDeferred: Boolean = false // Статус отложенной задачи
    // val createdAt: Long = System.currentTimeMillis()
 )

@@ -63,30 +63,7 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
             }
     }
 
-//    override fun deleteAllTasks(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-//        firestoreService.firestore.collection("tasks")
-//            .whereEqualTo("userId", userId)
-//            .get()
-//            .addOnSuccessListener { snapshot ->
-//                val batch = firestoreService.firestore.batch()
-//                for (doc in snapshot.documents) {
-//                    batch.delete(doc.reference)
-//                }
-//                batch.commit()
-//                    .addOnSuccessListener {
-//                    //    Log.d("TaskRepositoryImpl", "All tasks deleted for user: $userId")
-//                        onSuccess()
-//                    }
-//                    .addOnFailureListener { exception ->
-//                     //   Log.e("TaskRepositoryImpl", "Error committing batch deletion", exception)
-//                        onFailure(exception)
-//                    }
-//            }
-//            .addOnFailureListener { exception ->
-//               // Log.e("TaskRepositoryImpl", "Error fetching tasks for deletion", exception)
-//                onFailure(exception)
-//            }
-//    }
+
 
     override fun getAssignedTasks(userId: String, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit) {
         firestoreService.firestore.collection("tasks")
@@ -166,4 +143,65 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
                 onFailure(exception)
             }
     }
+
+    override fun getDeferredTasks(
+        userId: String,
+        currentTime: Long,
+        onSuccess: (List<Task>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        firestoreService.firestore.collection("tasks")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isDeferred", true)
+            .whereLessThanOrEqualTo("activationTime", currentTime)
+            .get()
+            .addOnSuccessListener { result ->
+                val tasks = result.map { document -> document.toObject<Task>().apply { taskId = document.id } }
+                onSuccess(tasks)
+                Log.d("TaskRepositoryImpl", "Deferred tasks fetched successfully: $tasks")
+            }
+            .addOnFailureListener { exception ->
+                Log.e("TaskRepositoryImpl", "Error fetching deferred tasks", exception)
+                onFailure(exception)
+            }
+    }
+
+    override fun activateDeferredTask(
+        taskId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        firestoreService.firestore.collection("tasks")
+            .document(taskId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val task = document.toObject(Task::class.java)
+                    if (task != null) {
+                        task.isDeferred = false
+                        task.activationTime = null
+                        firestoreService.firestore.collection("tasks")
+                            .document(taskId)
+                            .set(task)
+                            .addOnSuccessListener {
+                                onSuccess()
+                                Log.d("TaskRepositoryImpl", "Deferred task activated: $taskId")
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("TaskRepositoryImpl", "Error activating deferred task", exception)
+                                onFailure(exception)
+                            }
+                    } else {
+                        onFailure(Exception("Task not found"))
+                    }
+                } else {
+                    onFailure(Exception("Task not found"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("TaskRepositoryImpl", "Error retrieving task for activation", exception)
+                onFailure(exception)
+            }
+    }
+
 }

@@ -189,6 +189,36 @@ class TaskViewModel(
             })
         }
     }
+    fun fetchDeferredTasks(currentTime: Long) {
+        val userId = authViewModel.getCurrentUserId()
+        if (userId != null) {
+            viewModelScope.launch {
+                repository.getDeferredTasks(userId, currentTime, onSuccess = { taskList ->
+                    allTasks = taskList
+                    _tasks.value = taskList
+                    Log.d("TaskViewModel", "Deferred tasks fetched: ${taskList.map { it.taskId }}")
+                    Log.d("TaskViewModel", "All deferred tasks after fetch: $allTasks")
+                }, onFailure = {
+                    _tasks.value = emptyList() // Set empty list on failure
+                    Log.d("TaskViewModel", "Failed to fetch deferred tasks")
+                })
+            }
+        } else {
+            Log.e("TaskViewModel", "Error: UserId is empty")
+        }
+    }
+
+    fun activateDeferredTask(taskId: String) {
+        viewModelScope.launch {
+            repository.activateDeferredTask(taskId, onSuccess = {
+                Log.d("TaskViewModel", "Deferred task activated with ID: $taskId")
+                fetchTasks(authViewModel.getCurrentUserId() ?: "")
+            }, onFailure = {
+                Log.e("TaskViewModel", "Failed to activate deferred task", it)
+            })
+        }
+    }
+
 
 //    fun getAssignedTasks(userId: String) {
 //        viewModelScope.launch {
