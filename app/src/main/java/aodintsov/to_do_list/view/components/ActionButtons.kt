@@ -14,29 +14,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import aodintsov.to_do_list.R
-import aodintsov.to_do_list.model.SubTask
-import aodintsov.to_do_list.model.Task
+//import aodintsov.to_do_list.model.SubTask
+//import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 
 @Composable
 fun ActionButtons(
     taskId: String?,
-    taskTitle: String,
-    taskDescription: String,
+   // taskTitle: String,
+  //  taskDescription: String,
     userId: String,
-    isCompleted: Boolean,
-    deadline: Long?,
-    assignedTo: String,
-    subTasks: List<SubTask>,
-    priorityTask: Boolean,
+  //  isCompleted: Boolean,
+ //   deadline: Long?,
+ //   assignedTo: String,
+  //  subTasks: List<SubTask>,
+ //   priorityTask: Boolean,
     navController: NavController,
     taskViewModel: TaskViewModel,
-    onShowSnackbar: (String) -> Unit,
+//    onShowSnackbar: (String) -> Unit,
     modifier: Modifier = Modifier,
     onSaveTask: () -> Unit // Логика сохранения будет передаваться извне
 ) {
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
-    val emptyFieldsError = stringResource(R.string.empty_fields_message)
+        //val emptyFieldsError = stringResource(R.string.empty_fields_message)
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -21,7 +21,7 @@ fun ExpandableSection(
     content: @Composable () -> Unit
 ) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
-    val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
+    val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "")
 
     Column(
         modifier = Modifier

@@ -48,6 +48,25 @@
     <string name="confirm_delete">Delete</string>
     <string name="cancel_delete">Cancel</string>
     <string name="archive">archive</string>
+    <string name="select_Date">Deferred Task</string>
+    <string name="unarchive_task">Unarchive task</string>
+    <string name="archive_task">Archive task</string>
+    <string name="unarchive_task_confirm">Unarchive task confirm</string>
+    <string name="archive_task_confirm">Archive task confirm</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="forgot_password_prompt">Enter your email to reset your password</string>
+
+    <string name="send_reset_email_button">Send reset email</string>
+    <string name="notification_permission_denied">Notification permission denied</string>
+
+    <string name="enter_email_prompt">Please enter your email</string>
+    <string name="deferred_task">Deferred Task</string>
+    <string name="archived_task">Archived Task</string>
+    <string name="high_priority">High Priority</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="date_format">dd MMMM yyyy</string>
+    <string name="notification_permission_rationale">notification permission denied</string>
 
 
 </resources>

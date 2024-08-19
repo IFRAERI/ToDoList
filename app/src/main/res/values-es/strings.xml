@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Lista de Tareas</string>
     <string name="task_list_title">Lista de Tareas</string>
@@ -22,26 +21,50 @@
     <string name="add_subtask">Agregar Subtarea</string>
     <string name="save_task">Guardar Tarea</string>
     <string name="delete_task">Eliminar Tarea</string>
-    <string name="empty_fields_message">El Título y la Descripción no pueden estar vacíos</string>
+    <string name="empty_fields_message">El título y la descripción no pueden estar vacíos</string>
     <string name="no_deadline">Sin fecha límite</string>
-    <string name="login_screen_title">Iniciar Sesión</string>
-    <string name="email_label">Correo Electrónico</string>
+    <string name="login_screen_title">Iniciar sesión</string>
+    <string name="email_label">Correo electrónico</string>
     <string name="password_label">Contraseña</string>
-    <string name="login_button">Iniciar Sesión</string>
+    <string name="login_button">Iniciar sesión</string>
     <string name="register_button">Registrarse</string>
     <string name="forgot_password_button">Olvidé mi Contraseña</string>
     <string name="empty_fields_error">El correo electrónico y la contraseña no pueden estar vacíos.</string>
     <string name="login_failed_error">Error al iniciar sesión. Por favor, inténtalo de nuevo.</string>
     <string name="reset_email_sent">¡Correo de restablecimiento de contraseña enviado!</string>
     <string name="reset_email_failed">Error al enviar el correo de restablecimiento de contraseña: %1$s</string>
-    <string name="enter_email_for_reset">Por favor, introduce tu correo electrónico</string>
-    <string name="dismiss">Descartar</string>
+    <string name="enter_email_for_reset">Por favor, ingresa tu correo electrónico</string>
+    <string name="dismiss">Cerrar</string>
     <string name="unknown_error">Error desconocido</string>
     <string name="registration_title">Registro</string>
-    <string name="password_length_error">La contraseña debe tener al menos 8 caracteres</string>
-    <string name="registration_failed_error">Error al registrarse. Por favor, inténtalo de nuevo</string>
+    <string name="password_length_error">La contraseña debe contener al menos 8 caracteres</string>
+    <string name="registration_failed_error">Error en el registro. Por favor, inténtalo de nuevo</string>
     <string name="priority">Alta prioridad</string>
-    <string name="remove_deadline">Eliminar fecha límite</string>
-    <string name="unresolved_tasks_title">Tareas Sin Resolver</string>
-    <string name="unresolved_tasks_text">Tienes %1$d tareas sin resolver</string>
+    <string name="remove_deadline">Eliminar Fecha Límite</string>
+    <string name="unresolved_tasks_title">Tareas No Resueltas</string>
+    <string name="unresolved_tasks_text">Tienes %1$d tareas no resueltas</string>
+    <string name="confirm_delete_title">Confirmar Eliminación</string>
+    <string name="confirm_delete_message">¿Estás seguro de que deseas eliminar esta tarea?</string>
+    <string name="confirm_delete">Eliminar</string>
+    <string name="cancel_delete">Cancelar</string>
+    <string name="archive">Archivar</string>
+    <string name="select_Date">Seleccionar Fecha</string>
+    <string name="unarchive_task">Desarchivar Tarea</string>
+    <string name="archive_task">Archivar Tarea</string>
+    <string name="unarchive_task_confirm">Confirmar Desarchivado de Tarea</string>
+    <string name="archive_task_confirm">Confirmar Archivado de Tarea</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+    <string name="forgot_password_prompt">Ingresa tu correo electrónico para restablecer tu contraseña</string>
+
+    <string name="send_reset_email_button">Enviar correo de restablecimiento</string>
+    <string name="notification_permission_denied">Permiso de notificación denegado</string>
+
+    <string name="enter_email_prompt">Por favor, ingresa tu correo electrónico</string>
+    <string name="deferred_task">Tarea Postergada</string>
+    <string name="archived_task">Tarea Archivada</string>
+    <string name="high_priority">Alta Prioridad</string>
+    <string name="edit_task">Editar Tarea</string>
+    <string name="date_format">dd MMMM yyyy</string>
+    <string name="notification_permission_rationale">Permiso de notificación denegado</string>
 </resources>

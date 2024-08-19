@@ -1,9 +1,9 @@
 package aodintsov.to_do_list.view
 
 //import android.util.Log
-import androidx.compose.foundation.background
+//import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+//import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,11 +26,12 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by rememberSaveable { mutableStateOf("") }
-    val empty_fields_error = stringResource(R.string.empty_fields_error)
-    val login_failed_error = stringResource(R.string.login_failed_error)
-    val reset_email_sent = stringResource(R.string.reset_email_sent)
-    val reset_email_failed = stringResource(R.string.reset_email_failed)
-    val enter_email_for_reset = stringResource(R.string.enter_email_for_reset)
+    val emptyFieldsError = stringResource(R.string.empty_fields_error)
+    val loginFailedError = stringResource(R.string.login_failed_error)
+    val resetEmailSent = stringResource(R.string.reset_email_sent)
+    val resetEmailFailed = stringResource(R.string.reset_email_failed)
+    val enterEmailForReset = stringResource(R.string.enter_email_for_reset)
+    val unknownError = stringResource(R.string.unknown_error)
 
     Column(
         modifier = modifier
@@ -60,7 +61,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isBlank() || password.isBlank()) {
-                    snackbarMessage = empty_fields_error
+                    snackbarMessage = emptyFieldsError
                     showSnackbar = true
                 } else {
                     authViewModel.login(email, password) { success ->
@@ -69,7 +70,7 @@ fun LoginScreen(
                                 popUpTo("login") { inclusive = true }
                             }
                         } else {
-                            snackbarMessage = login_failed_error
+                            snackbarMessage = loginFailedError
                             showSnackbar = true
                         }
                     }
@@ -98,14 +99,14 @@ fun LoginScreen(
                 if (email.isNotBlank()) {
                     authViewModel.sendPasswordResetEmail(email) { success, exception ->
                         snackbarMessage = if (success) {
-                            reset_email_sent
+                            resetEmailSent
                         } else {
-                            reset_email_failed ; exception?.message ?: "unknown error"
+                            "$resetEmailFailed: ${exception?.message ?: unknownError}"
                         }
                         showSnackbar = true
                     }
                 } else {
-                    snackbarMessage = enter_email_for_reset
+                    snackbarMessage = enterEmailForReset
                     showSnackbar = true
                 }
             },

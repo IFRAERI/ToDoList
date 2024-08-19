@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Lista de Tarefas</string>
     <string name="task_list_title">Lista de Tarefas</string>
@@ -9,7 +8,7 @@
     <string name="no_tasks_available">Nenhuma tarefa disponível.</string>
     <string name="add_task">Adicionar Tarefa</string>
     <string name="confirm_logout">Confirmar Saída</string>
-    <string name="logout_message">Você tem certeza de que deseja sair?</string>
+    <string name="logout_message">Tem certeza de que deseja sair?</string>
     <string name="logout_confirm">Sair</string>
     <string name="logout_cancel">Cancelar</string>
     <string name="completed">Concluído</string>
@@ -22,26 +21,50 @@
     <string name="add_subtask">Adicionar Subtarefa</string>
     <string name="save_task">Salvar Tarefa</string>
     <string name="delete_task">Excluir Tarefa</string>
-    <string name="empty_fields_message">O Título e a Descrição não podem estar vazios</string>
+    <string name="empty_fields_message">O título e a descrição não podem estar vazios</string>
     <string name="no_deadline">Sem prazo</string>
     <string name="login_screen_title">Entrar</string>
     <string name="email_label">E-mail</string>
     <string name="password_label">Senha</string>
     <string name="login_button">Entrar</string>
     <string name="register_button">Registrar</string>
-    <string name="forgot_password_button">Esqueci minha Senha</string>
-    <string name="empty_fields_error">O e-mail e a senha não podem estar vazios.</string>
-    <string name="login_failed_error">Falha ao entrar. Por favor, tente novamente.</string>
+    <string name="forgot_password_button">Esqueci a Senha</string>
+    <string name="empty_fields_error">E-mail e senha não podem estar vazios.</string>
+    <string name="login_failed_error">Falha ao entrar. Tente novamente.</string>
     <string name="reset_email_sent">E-mail de redefinição de senha enviado!</string>
-    <string name="reset_email_failed">Falha ao enviar o e-mail de redefinição de senha: %1$s</string>
+    <string name="reset_email_failed">Falha ao enviar e-mail de redefinição de senha: %1$s</string>
     <string name="enter_email_for_reset">Por favor, insira seu e-mail</string>
-    <string name="dismiss">Dispensar</string>
+    <string name="dismiss">Fechar</string>
     <string name="unknown_error">Erro desconhecido</string>
     <string name="registration_title">Registro</string>
     <string name="password_length_error">A senha deve conter pelo menos 8 caracteres</string>
-    <string name="registration_failed_error">Falha no registro. Por favor, tente novamente</string>
+    <string name="registration_failed_error">Falha no registro. Tente novamente</string>
     <string name="priority">Alta prioridade</string>
     <string name="remove_deadline">Remover prazo</string>
     <string name="unresolved_tasks_title">Tarefas Pendentes</string>
     <string name="unresolved_tasks_text">Você tem %1$d tarefas pendentes</string>
+    <string name="confirm_delete_title">Confirmar Exclusão</string>
+    <string name="confirm_delete_message">Tem certeza de que deseja excluir esta tarefa?</string>
+    <string name="confirm_delete">Excluir</string>
+    <string name="cancel_delete">Cancelar</string>
+    <string name="archive">Arquivar</string>
+    <string name="select_Date">Selecionar Data</string>
+    <string name="unarchive_task">Desarquivar Tarefa</string>
+    <string name="archive_task">Arquivar Tarefa</string>
+    <string name="unarchive_task_confirm">Confirmar Desarquivamento</string>
+    <string name="archive_task_confirm">Confirmar Arquivamento</string>
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+    <string name="forgot_password_prompt">Insira seu e-mail para redefinir sua senha</string>
+
+    <string name="send_reset_email_button">Enviar e-mail de redefinição</string>
+    <string name="notification_permission_denied">Permissão de notificação negada</string>
+
+    <string name="enter_email_prompt">Por favor, insira seu e-mail</string>
+    <string name="deferred_task">Tarefa Adiada</string>
+    <string name="archived_task">Tarefa Arquivada</string>
+    <string name="high_priority">Alta Prioridade</string>
+    <string name="edit_task">Editar Tarefa</string>
+    <string name="date_format">dd MMMM yyyy</string>
+    <string name="notification_permission_rationale">Permissão de notificação negada</string>
 </resources>

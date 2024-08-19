@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">To-Do Lijst</string>
+    <string name="app_name">Takenlijst</string>
     <string name="task_list_title">Takenlijst</string>
     <string name="search_label">Zoeken</string>
     <string name="filter_tasks">Taken filteren</string>
@@ -7,7 +7,7 @@
     <string name="logout">Uitloggen</string>
     <string name="no_tasks_available">Geen taken beschikbaar.</string>
     <string name="add_task">Taak toevoegen</string>
-    <string name="confirm_logout">Uitloggen bevestigen</string>
+    <string name="confirm_logout">Afmelden bevestigen</string>
     <string name="logout_message">Weet je zeker dat je wilt uitloggen?</string>
     <string name="logout_confirm">Uitloggen</string>
     <string name="logout_cancel">Annuleren</string>
@@ -31,16 +31,40 @@
     <string name="forgot_password_button">Wachtwoord vergeten</string>
     <string name="empty_fields_error">E-mail en wachtwoord mogen niet leeg zijn.</string>
     <string name="login_failed_error">Inloggen mislukt. Probeer het opnieuw.</string>
-    <string name="reset_email_sent">Wachtwoord reset e-mail verzonden!</string>
-    <string name="reset_email_failed">Wachtwoord reset e-mail verzenden mislukt: %1$s</string>
-    <string name="enter_email_for_reset">Voer je e-mailadres in</string>
+    <string name="reset_email_sent">Wachtwoordreset-e-mail verzonden!</string>
+    <string name="reset_email_failed">Fout bij verzenden van wachtwoordreset-e-mail: %1$s</string>
+    <string name="enter_email_for_reset">Voer uw e-mail in</string>
     <string name="dismiss">Sluiten</string>
     <string name="unknown_error">Onbekende fout</string>
     <string name="registration_title">Registratie</string>
-    <string name="password_length_error">Het wachtwoord moet minstens 8 tekens bevatten</string>
+    <string name="password_length_error">Het wachtwoord moet minimaal 8 tekens bevatten</string>
     <string name="registration_failed_error">Registratie mislukt. Probeer het opnieuw</string>
     <string name="priority">Hoge prioriteit</string>
     <string name="remove_deadline">Deadline verwijderen</string>
-    <string name="unresolved_tasks_title">Onopgeloste taken</string>
+    <string name="unresolved_tasks_title">Oplossingstaken</string>
     <string name="unresolved_tasks_text">Je hebt %1$d onopgeloste taken</string>
+    <string name="confirm_delete_title">Verwijdering bevestigen</string>
+    <string name="confirm_delete_message">Weet je zeker dat je deze taak wilt verwijderen?</string>
+    <string name="confirm_delete">Verwijderen</string>
+    <string name="cancel_delete">Annuleren</string>
+    <string name="archive">Archiveren</string>
+    <string name="select_Date">Datum selecteren</string>
+    <string name="unarchive_task">Taak dearchiveren</string>
+    <string name="archive_task">Taak archiveren</string>
+    <string name="unarchive_task_confirm">Taak dearchiveren bevestigen</string>
+    <string name="archive_task_confirm">Taak archiveren bevestigen</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nee</string>
+    <string name="forgot_password_prompt">Voer uw e-mail in om uw wachtwoord opnieuw in te stellen</string>
+
+    <string name="send_reset_email_button">Verzend reset-e-mail</string>
+    <string name="notification_permission_denied">Meldingstoestemming geweigerd</string>
+
+    <string name="enter_email_prompt">Voer uw e-mail in</string>
+    <string name="deferred_task">Uitgestelde taak</string>
+    <string name="archived_task">Gearchiveerde taak</string>
+    <string name="high_priority">Hoge prioriteit</string>
+    <string name="edit_task">Taak bewerken</string>
+    <string name="date_format">dd MMMM yyyy</string>
+    <string name="notification_permission_rationale">Meldingstoestemming geweigerd</string>
 </resources>

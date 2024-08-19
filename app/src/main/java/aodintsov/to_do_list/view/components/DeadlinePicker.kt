@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,7 +26,7 @@ fun DeadlinePicker(
     val context = LocalContext.current
     val calendar = remember { Calendar.getInstance() }
 
-    // Установка календаря на текущее значение дедлайна
+
     deadline?.let { calendar.timeInMillis = it }
 
     val datePickerDialog = DatePickerDialog(
@@ -39,12 +40,15 @@ fun DeadlinePicker(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    Row(modifier = modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically // Align items in the center vertically
+    ) {
         MyDeadlineText(deadline)
         Spacer(modifier = Modifier.weight(1f))
         Button(onClick = {
             if (deadline != null) {
-                onClearDeadline() // Удаление дедлайна
+                onClearDeadline()
             } else {
                 datePickerDialog.show()
             }

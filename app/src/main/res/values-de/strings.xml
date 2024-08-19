@@ -43,4 +43,28 @@
     <string name="remove_deadline">Frist entfernen</string>
     <string name="unresolved_tasks_title">Ungelöste Aufgaben</string>
     <string name="unresolved_tasks_text">Sie haben %1$d ungelöste Aufgaben</string>
+    <string name="confirm_delete_title">Löschen bestätigen</string>
+    <string name="confirm_delete_message">Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?</string>
+    <string name="confirm_delete">Löschen</string>
+    <string name="cancel_delete">Abbrechen</string>
+    <string name="archive">Archivieren</string>
+    <string name="select_Date">Datum auswählen</string>
+    <string name="unarchive_task">Aufgabe aus dem Archiv holen</string>
+    <string name="archive_task">Aufgabe archivieren</string>
+    <string name="unarchive_task_confirm">Archivierung der Aufgabe bestätigen</string>
+    <string name="archive_task_confirm">Archivierung der Aufgabe bestätigen</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="forgot_password_prompt">Geben Sie Ihre E-Mail-Adresse ein, um Ihr Passwort zurückzusetzen</string>
+
+    <string name="send_reset_email_button">Reset-E-Mail senden</string>
+    <string name="notification_permission_denied">Benachrichtigungsberechtigung verweigert</string>
+
+    <string name="enter_email_prompt">Bitte geben Sie Ihre E-Mail ein</string>
+    <string name="deferred_task">Aufgeschobene Aufgabe</string>
+    <string name="archived_task">Archivierte Aufgabe</string>
+    <string name="high_priority">Hohe Priorität</string>
+    <string name="edit_task">Aufgabe bearbeiten</string>
+    <string name="date_format">dd MMMM yyyy</string>
+    <string name="notification_permission_rationale">Benachrichtigungsberechtigung verweigert</string>
 </resources>

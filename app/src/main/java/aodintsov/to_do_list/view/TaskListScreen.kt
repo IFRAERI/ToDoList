@@ -1,7 +1,6 @@
 package aodintsov.to_do_list.view
 
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,13 +9,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import aodintsov.to_do_list.R
-import aodintsov.to_do_list.model.Task
+import aodintsov.to_do_list.model.TaskFilter
 import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModel
@@ -24,8 +22,6 @@ import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
     navController: NavController,
@@ -39,39 +35,36 @@ fun TaskListScreen(
     val isAscending by taskViewModel.isAscending.observeAsState(true)
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     var showLogoutDialog by remember { mutableStateOf(false) }
-    var filterState by remember { mutableIntStateOf(0) }
+    var filterState by remember { mutableStateOf(TaskFilter.ALL) }
     val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     val today = dateFormatter.format(Date())
-    val calendar = Calendar.getInstance()
-    calendar.time = Date()
-    calendar.add(Calendar.DAY_OF_YEAR, -7)
-    val sevenDaysAgo = dateFormatter.format(calendar.time)
     var searchQuery by remember { mutableStateOf("") }
-    var showArchived by remember { mutableStateOf(false) }
 
     val filteredTasks = tasks.filter {
+        Log.d("TaskListScreen", "Filtering task: ${it.title}, Archived: ${it.archived}, Deferred: ${it.isDeferred}")
         it.title.contains(searchQuery, ignoreCase = true) ||
                 it.description.contains(searchQuery, ignoreCase = true)
     }.filter { task ->
         when (filterState) {
-            1 -> task.completed
-            2 -> !task.completed
-            else -> true
+            TaskFilter.COMPLETED -> task.completed
+            TaskFilter.UNCOMPLETED -> !task.completed
+            TaskFilter.ARCHIVED -> task.archived
+            TaskFilter.DEFERRED -> task.isDeferred && task.activationTime?.let { it > System.currentTimeMillis() } == true
+            TaskFilter.ALL -> !task.archived && (!task.isDeferred || task.activationTime?.let { it <= System.currentTimeMillis() } == true)
         }
-    }.filter { task ->
-        task.archived == showArchived
     }
 
     val groupedTasks = filteredTasks.groupBy { task ->
-        dateFormatter.format(Date(task.createdAt ?: 0))
+        dateFormatter.format(Date(task.createdAt))
     }.filter { (_, groupTasks) ->
         groupTasks.isNotEmpty()
     }
 
+
     LaunchedEffect(Unit) {
         val currentUserId = authViewModel.getCurrentUserId() ?: userId
         taskViewModel.fetchTasks(currentUserId)
-        Log.d("TaskListScreen", "Tasks fetched for user: $currentUserId")
+        //Log.d("TaskListScreen", "Tasks fetched for user: $currentUserId")
     }
 
     Scaffold(
@@ -83,13 +76,21 @@ fun TaskListScreen(
                 searchQuery = searchQuery,
                 onSearchQueryChange = { newValue -> searchQuery = newValue },
                 filterState = filterState,
-                onFilterChange = { filterState = (filterState + 1) % 3 },
+                onFilterChange = {
+                    filterState = when (filterState) {
+                        TaskFilter.ALL -> TaskFilter.ARCHIVED
+                        TaskFilter.ARCHIVED -> TaskFilter.DEFERRED
+                        TaskFilter.DEFERRED -> TaskFilter.COMPLETED
+                        TaskFilter.COMPLETED -> TaskFilter.UNCOMPLETED
+                        TaskFilter.UNCOMPLETED -> TaskFilter.ALL
+                    }
+                },
                 isAscending = isAscending,
                 onSortOrderChange = { taskViewModel.toggleSortOrder() },
-                showArchived = showArchived,
-                onArchiveToggle = { showArchived = !showArchived },
                 onLogoutClick = { showLogoutDialog = true }
             )
+
+
         }
     ) { innerPadding ->
         Box(
@@ -114,11 +115,11 @@ fun TaskListScreen(
                             item {
                                 ExpandableSection(title = date, initiallyExpanded = date == today) {
                                     tasks.forEach { task ->
-                                        key(task.taskId) {  // Уникальный ключ для каждого элемента
+                                        key(task.taskId) {
                                             TaskItem(
                                                 task = task,
                                                 onLongClick = {
-                                                    Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
+                                                   // Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
                                                     navController.navigate("addEditTask/${task.taskId}")
                                                 },
                                                 navController = navController,

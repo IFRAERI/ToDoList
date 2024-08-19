@@ -1,15 +1,15 @@
 <resources>
-    <string name="app_name">Lista di cose da fare</string>
-    <string name="task_list_title">Elenco attività</string>
+    <string name="app_name">Lista delle cose da fare</string>
+    <string name="task_list_title">Elenco delle attività</string>
     <string name="search_label">Cerca</string>
     <string name="filter_tasks">Filtra attività</string>
     <string name="sort">Ordina</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Disconnettersi</string>
     <string name="no_tasks_available">Nessuna attività disponibile.</string>
     <string name="add_task">Aggiungi attività</string>
-    <string name="confirm_logout">Conferma logout</string>
-    <string name="logout_message">Sei sicuro di voler uscire?</string>
-    <string name="logout_confirm">Esci</string>
+    <string name="confirm_logout">Conferma disconnessione</string>
+    <string name="logout_message">Sei sicuro di voler disconnetterti?</string>
+    <string name="logout_confirm">Disconnettersi</string>
     <string name="logout_cancel">Annulla</string>
     <string name="completed">Completato</string>
     <string name="deadline">Scadenza: %1$s</string>
@@ -21,19 +21,19 @@
     <string name="add_subtask">Aggiungi sotto-attività</string>
     <string name="save_task">Salva attività</string>
     <string name="delete_task">Elimina attività</string>
-    <string name="empty_fields_message">Titolo e descrizione non possono essere vuoti</string>
+    <string name="empty_fields_message">Il titolo e la descrizione non possono essere vuoti</string>
     <string name="no_deadline">Nessuna scadenza</string>
-    <string name="login_screen_title">Accedi</string>
+    <string name="login_screen_title">Accesso</string>
     <string name="email_label">Email</string>
     <string name="password_label">Password</string>
-    <string name="login_button">Accedi</string>
+    <string name="login_button">Accesso</string>
     <string name="register_button">Registrati</string>
     <string name="forgot_password_button">Password dimenticata</string>
     <string name="empty_fields_error">Email e password non possono essere vuoti.</string>
-    <string name="login_failed_error">Accesso fallito. Per favore riprova.</string>
-    <string name="reset_email_sent">Email di ripristino password inviata!</string>
-    <string name="reset_email_failed">Invio email di ripristino password fallito: %1$s</string>
-    <string name="enter_email_for_reset">Per favore inserisci la tua email</string>
+    <string name="login_failed_error">Accesso non riuscito. Per favore riprova.</string>
+    <string name="reset_email_sent">Email di reimpostazione della password inviata!</string>
+    <string name="reset_email_failed">Errore nell'invio dell'email di reimpostazione della password: %1$s</string>
+    <string name="enter_email_for_reset">Inserisci la tua email</string>
     <string name="dismiss">Chiudi</string>
     <string name="unknown_error">Errore sconosciuto</string>
     <string name="registration_title">Registrazione</string>
@@ -43,4 +43,28 @@
     <string name="remove_deadline">Rimuovi scadenza</string>
     <string name="unresolved_tasks_title">Attività irrisolte</string>
     <string name="unresolved_tasks_text">Hai %1$d attività irrisolte</string>
+    <string name="confirm_delete_title">Conferma eliminazione</string>
+    <string name="confirm_delete_message">Sei sicuro di voler eliminare questa attività?</string>
+    <string name="confirm_delete">Elimina</string>
+    <string name="cancel_delete">Annulla</string>
+    <string name="archive">Archivia</string>
+    <string name="select_Date">Seleziona data</string>
+    <string name="unarchive_task">Ripristina attività</string>
+    <string name="archive_task">Archivia attività</string>
+    <string name="unarchive_task_confirm">Conferma ripristino attività</string>
+    <string name="archive_task_confirm">Conferma archiviazione attività</string>
+    <string name="yes">Sì</string>
+    <string name="no">No</string>
+    <string name="forgot_password_prompt">Inserisci la tua email per reimpostare la password</string>
+
+    <string name="send_reset_email_button">Invia email di reimpostazione</string>
+    <string name="notification_permission_denied">Permesso di notifica negato</string>
+
+    <string name="enter_email_prompt">Inserisci la tua email</string>
+    <string name="deferred_task">Attività posticipata</string>
+    <string name="archived_task">Attività archiviata</string>
+    <string name="high_priority">Alta priorità</string>
+    <string name="edit_task">Modifica attività</string>
+    <string name="date_format">dd MMMM yyyy</string>
+    <string name="notification_permission_rationale">Permesso di notifica negato</string>
 </resources>

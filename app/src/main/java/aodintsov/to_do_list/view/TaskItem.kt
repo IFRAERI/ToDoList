@@ -7,11 +7,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -19,61 +23,59 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-//import androidx.test.espresso.base.Default
-
 import aodintsov.to_do_list.R
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.utils.*
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import java.util.Date
 import java.util.Locale
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun TaskItem(
     task: Task,
     onLongClick: () -> Unit,
     navController: NavController,
-    taskViewModel: TaskViewModel // Передайте TaskViewModel в эту функцию
+    taskViewModel: TaskViewModel
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Log.d("TaskItem", "Rendering TaskItem for task: ${task.taskId}")
 
     val taskItemState = rememberTaskItemState(task)
-    val dismissState = rememberSwipeToDismissState(
-        task = task,
-        onSwipe = {
-            if (task.archived) {
-                Log.d("TaskItem", "Unarchiving task: ${task.taskId}")
-                taskViewModel.unarchiveTask(task) // Вызов метода разархивации
+    val dismissState = rememberDismissState(
+        confirmStateChange = { dismissValue ->
+            if (dismissValue == DismissValue.DismissedToEnd || dismissValue == DismissValue.DismissedToStart) {
+                showDialog = true
+                false
             } else {
-                Log.d("TaskItem", "Archiving task: ${task.taskId}")
-                taskViewModel.archiveTask(task) // Вызов метода архивации
+                false
             }
         }
     )
 
-    SwipeToDismissBox(
+    SwipeToDismiss(
         state = dismissState,
-        backgroundContent = {
+        background = {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background) // Используйте основной цвет фона
+                    .background(MaterialTheme.colors.background)
                     .padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                Icon(Icons.Default.Delete, contentDescription = "Archive", tint = Color.White)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.archive), tint = Color.White)
             }
         },
-        content = {
+        dismissContent = {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-                    .background(if (taskItemState.isOverdue) Color.Red else MaterialTheme.colorScheme.surface)
+                    .background(if (taskItemState.isOverdue) Color.Red else MaterialTheme.colors.surface)
                     .combinedClickable(
                         onClick = {
                             taskItemState.isExpanded.value = !taskItemState.isExpanded.value
-                            Log.d("TaskItem", "Task expanded state changed for task: ${task.taskId}")
                         },
                         onLongClick = onLongClick
                     )
@@ -83,12 +85,19 @@ fun TaskItem(
             }
         }
     )
+
+    if (showDialog) {
+        ShowArchiveConfirmationDialog(task, taskViewModel)
+    }
 }
-
-
 @Composable
 fun TaskContent(task: Task, taskItemState: TaskItemState, navController: NavController) {
-    Log.d("TaskContent", "Rendering TaskContent for task: ${task.taskId}")
+    val deferredTaskDescription = stringResource(R.string.deferred_task)
+    val archivedTaskDescription = stringResource(R.string.archived_task)
+    val highPriorityDescription = stringResource(R.string.high_priority)
+    val completedDescription = stringResource(R.string.completed)
+    val editTaskDescription = stringResource(R.string.edit_task)
+
     Column(modifier = Modifier.padding(16.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -102,10 +111,26 @@ fun TaskContent(task: Task, taskItemState: TaskItemState, navController: NavCont
                     text = task.title,
                     modifier = Modifier.weight(1f)
                 )
+                if (task.isDeferred) {
+                    Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = deferredTaskDescription,
+                        tint = Color.Blue,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+                if (task.archived) {
+                    Icon(
+                        imageVector = Icons.Default.Archive,
+                        contentDescription = archivedTaskDescription,
+                        tint = Color.Gray,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
                 if (task.priority) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = "High Priority",
+                        contentDescription = highPriorityDescription,
                         tint = Color.Red,
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -113,20 +138,19 @@ fun TaskContent(task: Task, taskItemState: TaskItemState, navController: NavCont
                 if (task.completed && !taskItemState.isExpanded.value) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Completed",
+                        contentDescription = completedDescription,
                         tint = Color.Green,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
             if (taskItemState.isExpanded.value) {
-                Log.d("TaskContent", "Showing edit option for task: ${task.taskId}")
                 IconButton(onClick = {
-                    if (!task.archived) { // Логика для перехода на экран редактирования, если задача не архивирована
+                    if (!task.archived) {
                         navController.navigate("addEditTask/${task.taskId}")
                     }
                 }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Edit Task")
+                    Icon(Icons.Default.MoreVert, contentDescription = editTaskDescription)
                 }
             }
             Icon(
@@ -136,7 +160,6 @@ fun TaskContent(task: Task, taskItemState: TaskItemState, navController: NavCont
             )
         }
         if (taskItemState.isExpanded.value) {
-           // Log.d("TaskContent", "Showing edit option for task: ${task.taskId}")
             Text(text = task.description)
             Column {
                 task.subTasks.forEach { subTask ->
@@ -151,7 +174,7 @@ fun TaskContent(task: Task, taskItemState: TaskItemState, navController: NavCont
                         )
                         Text(
                             text = subTask.title,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.body1,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -160,12 +183,12 @@ fun TaskContent(task: Task, taskItemState: TaskItemState, navController: NavCont
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = task.completed,
-                    onCheckedChange = null // Task completion state is read-only in this context
+                    onCheckedChange = null
                 )
                 Text(text = stringResource(id = R.string.completed))
             }
             task.dueDate?.let {
-                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(it))
+                val formattedDate = SimpleDateFormat(stringResource(R.string.date_format), Locale.US).format(Date(it))
                 Text(text = stringResource(id = R.string.deadline, formattedDate))
             }
         }

@@ -6,6 +6,8 @@ import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.model.Task
 import aodintsov.to_do_list.model.TaskRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class TaskViewModel(
@@ -18,70 +20,65 @@ class TaskViewModel(
     private var allTasks: List<Task> = listOf()
     private val _isAscending = MutableLiveData<Boolean>(true)
     val isAscending: LiveData<Boolean> = _isAscending
+    private var deferredTaskJob: Job? = null
 
     init {
-        // Restore state
-        _tasks.value = savedStateHandle.get("tasks") ?: emptyList()
+        // Вместо setValue используем postValue
+        _tasks.postValue(savedStateHandle.get("tasks") ?: emptyList())
         allTasks = _tasks.value ?: emptyList()
-        Log.d("TaskViewModel", "Initial allTasks: $allTasks")
     }
+
     fun archiveTask(task: Task){
         val updatedTask = task.copy(archived = true)
         updateTask(updatedTask)
     }
+
     fun refreshTasks() {
-        _tasks.value = allTasks // Принудительное обновление состояния списка
+        _tasks.postValue(allTasks)
     }
 
     fun unarchiveTask(task: Task){
         val updatedTask = task.copy(archived = false)
         updateTask(updatedTask)
     }
-    fun filterTasks(showArchived: Boolean) {
-        _tasks.value = if (showArchived) {
-            allTasks.filter { it.archived }
-        } else {
-            allTasks.filter { !it.archived }
-        }
-    }
 
+    fun filterTasks(showArchived: Boolean) {
+        _tasks.postValue(
+            if (showArchived) {
+                allTasks.filter { it.archived }
+            } else {
+                allTasks.filter { !it.archived }
+            }
+        )
+    }
 
     fun fetchTasks(userId: String) {
         if (userId.isNotEmpty()) {
             viewModelScope.launch {
                 repository.getTasks(userId, onSuccess = { taskList ->
                     allTasks = taskList
-                    _tasks.value = taskList
-                    Log.d("TaskViewModel", "Fetched tasks: ${taskList.map { it.taskId }}")
-                    Log.d("TaskViewModel", "All tasks after fetch: $allTasks")
+                    _tasks.postValue(taskList)
                     savedStateHandle.set("tasks", taskList)
                 }, onFailure = {
-                    _tasks.value = emptyList() // Set empty list on failure
-                    Log.d("TaskViewModel", "Failed to fetch tasks")
+                    _tasks.postValue(emptyList())
                 })
             }
-        } else {
-            Log.e("TaskViewModel", "Error: UserId is empty")
         }
     }
 
     fun searchTasks(query: String) {
-        Log.d("TaskViewModel", "searchTasks called with query: $query")
-        Log.d("TaskViewModel", "All tasks before filtering: $allTasks")
-
-        val filteredTasks = if (query.isEmpty()) {
-            allTasks
-        } else {
-            allTasks.filter { task ->
-                task.title.contains(query, ignoreCase = true) ||
-                        task.description.contains(query, ignoreCase = true)
+        _tasks.postValue(
+            if (query.isEmpty()) {
+                allTasks
+            } else {
+                allTasks.filter { task ->
+                    task.title.contains(query, ignoreCase = true) ||
+                            task.description.contains(query, ignoreCase = true)
+                }
             }
-        }
-
-        Log.d("TaskViewModel", "Filtered tasks before setting: $filteredTasks")
-        _tasks.value = filteredTasks
-        Log.d("TaskViewModel", "Filtered tasks after setting: ${_tasks.value}")
+        )
     }
+
     fun toggleSortOrder() {
         _isAscending.value = _isAscending.value?.not()
         sortTasks()
@@ -89,51 +86,27 @@ class TaskViewModel(
 
     private fun sortTasks() {
         val ascending = _isAscending.value ?: true
-        _tasks.value = if (ascending) {
-            _tasks.value?.sortedBy { it.createdAt }
-        } else {
-            _tasks.value?.sortedByDescending { it.createdAt }
-        }
+        _tasks.postValue(
+            if (ascending) {
+                _tasks.value?.sortedBy { it.createdAt }
+            } else {
+                _tasks.value?.sortedByDescending { it.createdAt }
+            }
+        )
     }
-
-    fun loadTasks() {
-        // Load tasks from repository
-        // Example: _tasks.value = repository.getTasks()
-        sortTasks()
-    }
-
-//    fun deleteAllTasks(userId: String) {
-//        viewModelScope.launch {
-//            repository.deleteAllTasks(userId, onSuccess = {
-//                _tasks.value = emptyList()
-//                allTasks = emptyList()
-//                savedStateHandle.set("tasks", emptyList<Task>())
-//                Log.d("TaskViewModel", "All tasks after delete: $allTasks")
-//            }, onFailure = {
-//                // Handle error
-//            })
-//        }
-//    }
 
     fun addTask(task: Task) {
-        //val currentUser = FirebaseAuth.getInstance().currentUser
-        //if (currentUser != null) {
-
-            val userId = authViewModel.getCurrentUserId()
+        val userId = authViewModel.getCurrentUserId()
         if (userId != null) {
-            val taskId = System.currentTimeMillis().toString() // Use timestamp as taskId
+            val taskId = System.currentTimeMillis().toString()
             val newTask = task.copy(taskId = taskId, userId = userId)
             viewModelScope.launch {
                 repository.addTask(newTask, onSuccess = {
-                    Log.d("TaskViewModel", "Task added successfully: $newTask")
                     fetchTasks(userId)
                 }, onFailure = {
-                    Log.e("TaskViewModel", "Failed to add task", it)
                     // Handle error
                 })
             }
-        } else {
-            Log.e("TaskViewModel", "Error: User is not authenticated")
         }
     }
 
@@ -141,7 +114,6 @@ class TaskViewModel(
         viewModelScope.launch {
             repository.updateTask(task, onSuccess = {
                 fetchTasks(task.userId)
-                Log.d("TaskViewModel", "Updated task with ID: ${task.taskId}")
             }, onFailure = {
                 // Handle error
             })
@@ -152,7 +124,6 @@ class TaskViewModel(
         viewModelScope.launch {
             repository.deleteTask(taskId, onSuccess = {
                 fetchTasks(userId)
-                Log.d("TaskViewModel", "Deleted task with ID: $taskId")
             }, onFailure = {
                 // Handle error
             })
@@ -160,26 +131,12 @@ class TaskViewModel(
     }
 
     fun getTaskById(taskId: String): Task? {
-        val task = _tasks.value?.find { it.taskId == taskId }
-        Log.d("TaskViewModel", "getTaskById($taskId): $task")
-        return task
+        return _tasks.value?.find { it.taskId == taskId }
     }
-
-//    fun assignTaskToUser(taskId: String, assignedTo: String) {
-//        viewModelScope.launch {
-//            repository.assignTaskToUser(taskId, assignedTo, onSuccess = {
-//                // Refresh tasks to reflect assignment
-//                fetchTasks(assignedTo)
-//            }, onFailure = {
-//                // Handle error
-//            })
-//        }
-//    }
 
     fun updateSubTask(taskId: String, subTask: SubTask) {
         viewModelScope.launch {
             repository.updateSubTask(taskId, subTask, onSuccess = {
-                // Refresh tasks to reflect sub-task update
                 val task = getTaskById(taskId)
                 task?.let {
                     fetchTasks(it.userId)
@@ -189,48 +146,77 @@ class TaskViewModel(
             })
         }
     }
+
     fun fetchDeferredTasks(currentTime: Long) {
         val userId = authViewModel.getCurrentUserId()
         if (userId != null) {
             viewModelScope.launch {
                 repository.getDeferredTasks(userId, currentTime, onSuccess = { taskList ->
                     allTasks = taskList
-                    _tasks.value = taskList
-                    Log.d("TaskViewModel", "Deferred tasks fetched: ${taskList.map { it.taskId }}")
-                    Log.d("TaskViewModel", "All deferred tasks after fetch: $allTasks")
+                    _tasks.postValue(taskList)
                 }, onFailure = {
-                    _tasks.value = emptyList() // Set empty list on failure
-                    Log.d("TaskViewModel", "Failed to fetch deferred tasks")
+                    _tasks.postValue(emptyList())
                 })
             }
-        } else {
-            Log.e("TaskViewModel", "Error: UserId is empty")
         }
     }
 
     fun activateDeferredTask(taskId: String) {
         viewModelScope.launch {
+            Log.d("TaskViewModel", "Начало активации отложенной задачи с ID: $taskId")
             repository.activateDeferredTask(taskId, onSuccess = {
-                Log.d("TaskViewModel", "Deferred task activated with ID: $taskId")
+                Log.d("TaskViewModel", "Задача успешно активирована: $taskId")
                 fetchTasks(authViewModel.getCurrentUserId() ?: "")
-            }, onFailure = {
-                Log.e("TaskViewModel", "Failed to activate deferred task", it)
+            }, onFailure = { exception ->
+                Log.e("TaskViewModel", "Ошибка активации задачи: $taskId", exception)
             })
         }
     }
 
 
-//    fun getAssignedTasks(userId: String) {
-//        viewModelScope.launch {
-//            repository.getAssignedTasks(userId, onSuccess = { taskList ->
-//                allTasks = taskList
-//                _tasks.value = taskList
-//                Log.d("TaskViewModel", "Fetched assigned tasks: ${taskList.map { it.taskId }}")
-//                savedStateHandle.set("tasks", taskList)
-//            }, onFailure = {
-//                _tasks.value = emptyList() // Set empty list on failure
-//                Log.d("TaskViewModel", "Failed to fetch assigned tasks")
-//            })
-//        }
-//    }
+    fun startDeferredTaskChecker() {
+        if (deferredTaskJob == null || deferredTaskJob?.isActive == false) {
+            deferredTaskJob = viewModelScope.launch {
+                while (true) {
+                    checkAndActivateDeferredTasks()
+                    delay(3600000L)
+                }
+            }
+        }
+    }
+
+    suspend fun checkAndActivateDeferredTasks() {
+        val currentTime = System.currentTimeMillis()
+        Log.d("TaskViewModel", "Начало проверки отложенных задач, текущее время: $currentTime")
+
+        repository.getDeferredTasks(
+            userId = authViewModel.getCurrentUserId() ?: "",
+            currentTime = currentTime,
+            onSuccess = { deferredTasks ->
+                Log.d("TaskViewModel", "Получено ${deferredTasks.size} отложенных задач для активации")
+
+                deferredTasks.forEach { task ->
+                    val activationTime = task.activationTime
+                    Log.d("TaskViewModel", "Проверка задачи с ID: ${task.taskId}, activationTime: $activationTime")
+
+                    if (activationTime != null && activationTime <= currentTime) {
+                        Log.d("TaskViewModel", "Активация задачи с ID: ${task.taskId}")
+                        activateDeferredTask(task.taskId)
+                    } else {
+                        Log.d("TaskViewModel", "Задача с ID: ${task.taskId} еще не готова к активации")
+                    }
+                }
+            },
+            onFailure = { exception ->
+                Log.e("TaskViewModel", "Ошибка при получении отложенных задач: ${exception.message}")
+            }
+        )
+    }
+
+
+
+    override fun onCleared() {
+        super.onCleared()
+        deferredTaskJob?.cancel()
+    }
 }

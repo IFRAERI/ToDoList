@@ -1,5 +1,6 @@
 package aodintsov.to_do_list.view
 
+import aodintsov.to_do_list.view.components.TitleInput
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,9 +20,10 @@ import aodintsov.to_do_list.model.SubTask
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import aodintsov.to_do_list.view.components.*
+
 import java.util.*
 import aodintsov.to_do_list.model.Task
-
+import android.widget.Toast
 
 @Composable
 fun AddEditTaskScreen(
@@ -31,6 +33,8 @@ fun AddEditTaskScreen(
     taskViewModelFactory: TaskViewModelFactory,
     modifier: Modifier = Modifier
 ) {
+    var activationTime by rememberSaveable { mutableStateOf<Long?>(null) }
+    var isDeferred by rememberSaveable { mutableStateOf(false) }
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     var taskTitle by rememberSaveable { mutableStateOf("") }
     var taskDescription by rememberSaveable { mutableStateOf("") }
@@ -40,10 +44,8 @@ fun AddEditTaskScreen(
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
     var assignedTo by rememberSaveable { mutableStateOf("") }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
-    var showSnackbar by rememberSaveable { mutableStateOf(false) }
-    var snackbarMessage by rememberSaveable { mutableStateOf("") }
-    val emptyFieldsError = stringResource(R.string.empty_fields_message)
     val context = LocalContext.current
+    val emptyFieldsError = stringResource(R.string.empty_fields_message)
     val calendar = Calendar.getInstance()
     deadline?.let { calendar.timeInMillis = it }
 
@@ -65,6 +67,8 @@ fun AddEditTaskScreen(
                 assignedTo = it.assignedTo
                 subTasks = it.subTasks
                 isPriority = it.priority
+                activationTime = it.activationTime
+                isDeferred = it.isDeferred
             }
         }
     }
@@ -103,11 +107,19 @@ fun AddEditTaskScreen(
                 deadline = deadline,
                 onDatePick = { selectedCalendar ->
                     deadline = selectedCalendar.timeInMillis
-                    isPriority = true // Установка высокого приоритета при наличии дедлайна
+                    isPriority = true
                 },
                 onClearDeadline = {
                     deadline = null
                     isPriority = false
+                }
+            )
+
+            DeferredDateTimePicker(
+                deferredUntil = activationTime,
+                onDeferredDateTimeChange = { selectedTime ->
+                    activationTime = selectedTime
+                    isDeferred = selectedTime != null
                 }
             )
 
@@ -127,24 +139,12 @@ fun AddEditTaskScreen(
 
             ActionButtons(
                 taskId = taskId,
-                taskTitle = taskTitle,
-                taskDescription = taskDescription,
                 userId = userId,
-                isCompleted = isCompleted,
-                deadline = deadline,
-                assignedTo = assignedTo,
-                subTasks = subTasks,
-                priorityTask = isPriority,
                 navController = navController,
                 taskViewModel = taskViewModel,
-                onShowSnackbar = { message ->
-                    snackbarMessage = message
-                    showSnackbar = true
-                },
                 onSaveTask = {
                     if (taskTitle.isBlank() || taskDescription.isBlank()) {
-                        snackbarMessage = emptyFieldsError
-                        showSnackbar = true
+                        Toast.makeText(context, emptyFieldsError, Toast.LENGTH_SHORT).show()
                     } else {
                         subTasks = subTasks.filter { it.title.isNotBlank() }
                         if (taskId == null) {
@@ -159,6 +159,8 @@ fun AddEditTaskScreen(
                                     assignedTo = assignedTo,
                                     subTasks = subTasks,
                                     priority = isPriority,
+                                    activationTime = activationTime,
+                                    isDeferred = isDeferred,
                                     createdAt = System.currentTimeMillis(),
                                     completionDate = if (isCompleted) System.currentTimeMillis() else null
                                 )
@@ -173,6 +175,8 @@ fun AddEditTaskScreen(
                                 dueDate = deadline,
                                 assignedTo = assignedTo,
                                 subTasks = subTasks,
+                                activationTime = activationTime,
+                                isDeferred = isDeferred,
                                 priority = isPriority,
                                 completionDate = if (isCompleted) System.currentTimeMillis() else null
                             )
@@ -183,42 +187,29 @@ fun AddEditTaskScreen(
                 }
             )
 
-
-            if (showSnackbar) {
-            Snackbar(
-                action = {
-                    Button(onClick = { showSnackbar = false }) {
-                        Text(stringResource(R.string.dismiss))
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    title = { Text(text = stringResource(R.string.confirm_delete_title)) },
+                    text = { Text(text = stringResource(R.string.confirm_delete_message)) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                taskViewModel.deleteTask(taskId!!, userId)
+                                navController.navigateUp()
+                                showDeleteDialog = false
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.confirm_delete))
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDeleteDialog = false }) {
+                            Text(text = stringResource(R.string.cancel_delete))
+                        }
                     }
-                },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = snackbarMessage)
+                )
             }
         }
-
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = { Text(text = stringResource(R.string.confirm_delete_title)) },
-                text = { Text(text = stringResource(R.string.confirm_delete_message)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            taskViewModel.deleteTask(taskId!!, userId)
-                            navController.navigateUp()
-                            showDeleteDialog = false
-                        }
-                    ) {
-                        Text(text = stringResource(R.string.confirm_delete))
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showDeleteDialog = false }) {
-                        Text(text = stringResource(R.string.cancel_delete))
-                    }
-                }
-            )
-        }
     }
-}}
+}

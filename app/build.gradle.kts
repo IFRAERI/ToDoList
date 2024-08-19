@@ -51,42 +51,34 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx.android)
-    implementation(libs.androidx.activity.compose.v180)
-    implementation(platform(libs.androidx.compose.bom.v20230501))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
-    implementation(libs.androidx.navigation.compose.v271)
-    implementation(libs.androidx.runtime.livedata.v151)
-    implementation(libs.androidx.room.compiler)
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
+    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    implementation("androidx.compose.ui:ui:1.6.8")
+    implementation("androidx.compose.ui:ui-graphics:1.6.8")
+    implementation("androidx.compose.ui:ui-tooling:1.6.8")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha06")
+    implementation("androidx.navigation:navigation-compose:2.7.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.1")
+    implementation("androidx.room:room-compiler:2.6.1")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.31.3-beta")
+    implementation("androidx.compose.material:material:1.6.8")
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.8")
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit.v121)
-    androidTestImplementation(libs.androidx.espresso.core.v361)
-    androidTestImplementation(platform(libs.androidx.compose.bom.v20240600))
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling.v151)
-    debugImplementation(libs.ui.test.manifest)
+
 
     // Firebase dependencies
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.play.services.auth)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.androidx.material.icons.extended)
-    //implementation (com.google.accompanist:accompanist-navigation-animation:0.35.1-alpha)
-    implementation (libs.firebase.ads)
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
+    implementation("com.google.firebase:firebase-ads:23.2.0")
+    implementation("com.google.android.gms:play-services-ads:23.2.0")
 
-    implementation (libs.play.services.ads)
-
-
-
-
-    implementation("androidx.compose.material3:material3:1.2.0") {
+    implementation("androidx.compose.material3:material3:1.2.0-alpha06") {
         exclude(group = "com.intellij", module = "annotations")
     }
 }

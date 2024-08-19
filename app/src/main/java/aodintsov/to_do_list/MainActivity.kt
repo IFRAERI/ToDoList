@@ -24,22 +24,22 @@ import aodintsov.to_do_list.model.TaskRepositoryImpl
 import aodintsov.to_do_list.navigation.AppNavigation
 import aodintsov.to_do_list.ui.theme.ToDoListTheme
 import aodintsov.to_do_list.utils.AlarmUtils
-import aodintsov.to_do_list.viewmodel.AuthViewModel
-import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
-import aodintsov.to_do_list.viewmodel.NavControllerViewModel
-import aodintsov.to_do_list.viewmodel.NavControllerViewModelFactory
-import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
+import aodintsov.to_do_list.viewmodel.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.ads.MobileAds
+import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
+
+    private val mainActivityScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             AlarmUtils.setDailyReminder(this)
         } else {
-
+            showSnackbar(R.string.notification_permission_denied)
         }
     }
 
@@ -59,15 +59,17 @@ class MainActivity : ComponentActivity() {
                 val navControllerViewModel = rememberNavControllerViewModel()
                 val navController = navControllerViewModel.navController
 
-                var showLogoutDialog by remember { mutableStateOf(false) }
+              //  var showLogoutDialog by remember { mutableStateOf(false) }
+                val snackbarHostState = remember { SnackbarHostState() }
 
                 Content(
                     navController = navController,
                     authViewModelFactory = authViewModelFactory,
                     taskViewModelFactory = taskViewModelFactory,
                     firebaseAuth = firebaseAuth,
-                    showLogoutDialog = showLogoutDialog,
-                    onDismissLogoutDialog = { showLogoutDialog = false }
+//                    showLogoutDialog = showLogoutDialog,
+//                    onDismissLogoutDialog = { showLogoutDialog = false },
+                    snackbarHostState = snackbarHostState
                 )
 
                 DisposableEffect(Unit) {
@@ -80,6 +82,7 @@ class MainActivity : ComponentActivity() {
 
         createNotificationChannel()
         checkNotificationPermissionAndSetAlarm()
+        startDeferredTaskChecker(taskViewModelFactory)
     }
 
     @SuppressLint("RememberReturnType")
@@ -101,8 +104,9 @@ class MainActivity : ComponentActivity() {
         taskViewModelFactory: TaskViewModelFactory,
         firebaseAuth: FirebaseAuth,
         modifier: Modifier = Modifier,
-        showLogoutDialog: Boolean,
-        onDismissLogoutDialog: () -> Unit
+//        showLogoutDialog: Boolean,
+//        onDismissLogoutDialog: () -> Unit,
+        snackbarHostState: SnackbarHostState
     ) {
         AppNavigation(
             navController = navController,
@@ -112,28 +116,47 @@ class MainActivity : ComponentActivity() {
             modifier = modifier
         )
 
-        if (showLogoutDialog) {
-            AlertDialog(
-                onDismissRequest = onDismissLogoutDialog,
-                title = { Text("Confirm Logout") },
-                text = { Text("Are you sure you want to logout?") },
-                confirmButton = {
-                    Button(onClick = {
-                        firebaseAuth.signOut()
-                        navController.navigate("login") {
-                            popUpTo("taskList") { inclusive = true }
-                        }
-                        onDismissLogoutDialog()
-                    }) {
-                        Text("Logout")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = onDismissLogoutDialog) {
-                        Text("Cancel")
-                    }
-                }
+//        if (showLogoutDialog) {
+//            AlertDialog(
+//                onDismissRequest = onDismissLogoutDialog,
+//                title = { Text("Confirm Logout") },
+//                text = { Text("Are you sure you want to logout?") },
+//                confirmButton = {
+//                    Button(onClick = {
+//                        firebaseAuth.signOut()
+//                        navController.navigate("login") {
+//                            popUpTo("taskList") { inclusive = true }
+//                        }
+//                        onDismissLogoutDialog()
+//                    }) {
+//                        Text("Logout")
+//                    }
+//                },
+//                dismissButton = {
+//                    Button(onClick = onDismissLogoutDialog) {
+//                        Text("Cancel")
+//                    }
+//                }
+//            )
+//        }
+
+        SnackbarHost(hostState = snackbarHostState)
+    }
+
+    private fun startDeferredTaskChecker(taskViewModelFactory: TaskViewModelFactory) {
+        mainActivityScope.launch {
+            delay(15000)
+
+            val taskViewModel = TaskViewModel(
+                repository = taskViewModelFactory.getRepository(),
+                authViewModel = taskViewModelFactory.getAuthViewModel(),
+                savedStateHandle = createSavedStateHandle()
             )
+
+            while (isActive) {
+                taskViewModel.checkAndActivateDeferredTasks()
+                delay(3600000)
+            }
         }
     }
 
@@ -160,20 +183,30 @@ class MainActivity : ComponentActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-
                     AlarmUtils.setDailyReminder(this)
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
 
+                    showSnackbar(R.string.notification_permission_rationale)
                 }
                 else -> {
-
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         } else {
-
             AlarmUtils.setDailyReminder(this)
         }
+    }
+
+    private fun showSnackbar(messageResId: Int) {
+        mainActivityScope.launch {
+            val snackbarHostState = SnackbarHostState()
+            snackbarHostState.showSnackbar(getString(messageResId))
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mainActivityScope.cancel()
     }
 }

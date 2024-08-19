@@ -151,20 +151,20 @@ class TaskRepositoryImpl(private val firestoreService: FirestoreService) : TaskR
         onFailure: (Exception) -> Unit
     ) {
         firestoreService.firestore.collection("tasks")
-            .whereEqualTo("userId", userId)
-            .whereEqualTo("isDeferred", true)
+            .whereEqualTo("deferred", true)
             .whereLessThanOrEqualTo("activationTime", currentTime)
+            .whereEqualTo("userId", userId)
             .get()
-            .addOnSuccessListener { result ->
-                val tasks = result.map { document -> document.toObject<Task>().apply { taskId = document.id } }
+            .addOnSuccessListener { documents ->
+                val tasks = documents.mapNotNull { it.toObject(Task::class.java) }
                 onSuccess(tasks)
-                Log.d("TaskRepositoryImpl", "Deferred tasks fetched successfully: $tasks")
             }
             .addOnFailureListener { exception ->
                 Log.e("TaskRepositoryImpl", "Error fetching deferred tasks", exception)
                 onFailure(exception)
             }
     }
+
 
     override fun activateDeferredTask(
         taskId: String,

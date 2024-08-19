@@ -17,4 +17,14 @@ class TaskViewModelFactory(
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
+
+
+    fun getRepository(): TaskRepository {
+        return repository
+    }
+
+
+    fun getAuthViewModel(): AuthViewModel {
+        return authViewModel
+    }
 }

@@ -24,9 +24,9 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
     var showSnackbar by remember { mutableStateOf(false) }
-    val empty_fields_error = stringResource(R.string.empty_fields_error)
-    val password_length_error = stringResource(R.string.password_length_error)
-    val registration_failed_error = stringResource(R.string.registration_failed_error)
+    val emptyFieldsError = stringResource(R.string.empty_fields_error)
+    val passwordLengthError = stringResource(R.string.password_length_error)
+    val registrationFailedError = stringResource(R.string.registration_failed_error)
 
 
     Column(
@@ -58,18 +58,18 @@ fun RegisterScreen(
         Button(
             onClick = {
                 if (email.isBlank() || password.isBlank()) {
-                    errorMessage = empty_fields_error
+                    errorMessage = emptyFieldsError
                     showSnackbar = true
                 } else if (password.length < 8) {
-                    errorMessage = password_length_error
+                    errorMessage = passwordLengthError
                     showSnackbar = true
                 } else {
                     authViewModel.register(email, password) { success ->
                         if (success) {
                             navController.navigate("taskList")
                         } else {
-                            // Обработка ошибки регистрации
-                            errorMessage = registration_failed_error
+                            
+                            errorMessage = registrationFailedError
                             showSnackbar = true
                         }
                     }

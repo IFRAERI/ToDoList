@@ -14,18 +14,15 @@ import androidx.compose.ui.unit.dp
 import aodintsov.to_do_list.R
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.draw.clip
-
-
+import aodintsov.to_do_list.model.TaskFilter
 @Composable
 fun TaskListTopBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    filterState: Int,
+    filterState: TaskFilter,
     onFilterChange: () -> Unit,
     isAscending: Boolean,
     onSortOrderChange: () -> Unit,
-    showArchived: Boolean,
-    onArchiveToggle: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Row {
@@ -47,37 +44,35 @@ fun TaskListTopBar(
         )
         Spacer(modifier = Modifier.weight(0.05f))
 
-        IconButton(onClick = onArchiveToggle) {
-            Icon(
-                imageVector = Icons.Default.Archive,
-                contentDescription = stringResource(id = R.string.archive),
-                tint = if (showArchived) Color.Red else Color.Gray
-            )
-        }
-
         IconButton(onClick = onFilterChange) {
             val icon = when (filterState) {
-                1 -> Icons.Default.Check
-                2 -> Icons.Default.Clear
-                else -> Icons.Default.Circle
+                TaskFilter.ALL -> Icons.Default.Menu // Значок по умолчанию (три черточки)
+                TaskFilter.ARCHIVED -> Icons.Default.Archive
+                TaskFilter.DEFERRED -> Icons.Default.Schedule
+                TaskFilter.COMPLETED -> Icons.Default.Check
+                TaskFilter.UNCOMPLETED -> Icons.Default.Clear
+                // Значок по умолчанию
             }
             Icon(
                 imageVector = icon,
-                contentDescription = stringResource(id = R.string.filter_tasks)
+                contentDescription = stringResource(id = R.string.filter_tasks),
+                tint = Color.Gray
             )
         }
 
         IconButton(onClick = onSortOrderChange) {
             Icon(
                 imageVector = if (isAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                contentDescription = stringResource(id = R.string.sort)
+                contentDescription = stringResource(id = R.string.sort),
+                tint = Color.Gray
             )
         }
 
         IconButton(onClick = onLogoutClick) {
             Icon(
                 Icons.AutoMirrored.Filled.Logout,
-                contentDescription = stringResource(id = R.string.logout)
+                contentDescription = stringResource(id = R.string.logout),
+                tint = Color.Gray
             )
         }
     }

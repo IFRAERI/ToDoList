@@ -7,12 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import aodintsov.to_do_list.R
 import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
-
 @Composable
 fun ForgotPasswordScreen(
     navController: NavController,
@@ -25,6 +26,11 @@ fun ForgotPasswordScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
+    // Получаем строки до вызова функций
+    val resetEmailSent = stringResource(R.string.reset_email_sent)
+    val resetEmailFailed = stringResource(R.string.reset_email_failed)
+    val enterEmailPrompt = stringResource(R.string.enter_email_prompt)
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -32,14 +38,17 @@ fun ForgotPasswordScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Enter your email to reset your password", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = stringResource(R.string.forgot_password_prompt),
+            style = MaterialTheme.typography.titleLarge
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.email_label)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -50,25 +59,28 @@ fun ForgotPasswordScreen(
                 authViewModel.sendPasswordResetEmail(email) { success, exception ->
                     if (success) {
                         emailSent = true
-                        Toast.makeText(context, "Password reset email sent!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, resetEmailSent, Toast.LENGTH_SHORT).show()
                     } else {
-                        errorMessage = exception?.message ?: "Error sending password reset email"
+                        errorMessage = exception?.message ?: resetEmailFailed
                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                Toast.makeText(context, "Please enter your email", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, enterEmailPrompt, Toast.LENGTH_SHORT).show()
             }
         }) {
-            Text("Send reset email")
+            Text(stringResource(R.string.send_reset_email_button))
         }
 
         if (emailSent) {
-            Text("Password reset email sent!", color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = resetEmailSent,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
-        if (errorMessage != null) {
-            Text(errorMessage!!, color = MaterialTheme.colorScheme.error)
+        errorMessage?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
         }
     }
 }
