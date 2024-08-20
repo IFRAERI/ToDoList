@@ -174,41 +174,41 @@ class TaskViewModel(
     }
 
 
-    fun startDeferredTaskChecker() {
-        if (deferredTaskJob == null || deferredTaskJob?.isActive == false) {
-            deferredTaskJob = viewModelScope.launch {
-                while (true) {
-                    checkAndActivateDeferredTasks()
-                    delay(3600000L)
-                }
-            }
-        }
-    }
+//    fun startDeferredTaskChecker() {
+//        if (deferredTaskJob == null || deferredTaskJob?.isActive == false) {
+//            deferredTaskJob = viewModelScope.launch {
+//                while (true) {
+//                    checkAndActivateDeferredTasks()
+//                    delay(3600000L)
+//                }
+//            }
+//        }
+//    }
 
     suspend fun checkAndActivateDeferredTasks() {
         val currentTime = System.currentTimeMillis()
-        Log.d("TaskViewModel", "Начало проверки отложенных задач, текущее время: $currentTime")
+     //   Log.d("TaskViewModel", "Начало проверки отложенных задач, текущее время: $currentTime")
 
         repository.getDeferredTasks(
             userId = authViewModel.getCurrentUserId() ?: "",
             currentTime = currentTime,
             onSuccess = { deferredTasks ->
-                Log.d("TaskViewModel", "Получено ${deferredTasks.size} отложенных задач для активации")
+               // Log.d("TaskViewModel", "Получено ${deferredTasks.size} отложенных задач для активации")
 
                 deferredTasks.forEach { task ->
                     val activationTime = task.activationTime
-                    Log.d("TaskViewModel", "Проверка задачи с ID: ${task.taskId}, activationTime: $activationTime")
+                        //  Log.d("TaskViewModel", "Проверка задачи с ID: ${task.taskId}, activationTime: $activationTime")
 
                     if (activationTime != null && activationTime <= currentTime) {
-                        Log.d("TaskViewModel", "Активация задачи с ID: ${task.taskId}")
+                     //   Log.d("TaskViewModel", "Активация задачи с ID: ${task.taskId}")
                         activateDeferredTask(task.taskId)
                     } else {
-                        Log.d("TaskViewModel", "Задача с ID: ${task.taskId} еще не готова к активации")
+                    //    Log.d("TaskViewModel", "Задача с ID: ${task.taskId} еще не готова к активации")
                     }
                 }
             },
             onFailure = { exception ->
-                Log.e("TaskViewModel", "Ошибка при получении отложенных задач: ${exception.message}")
+              //  Log.e("TaskViewModel", "Ошибка при получении отложенных задач: ${exception.message}")
             }
         )
     }

@@ -33,6 +33,7 @@ fun AddEditTaskScreen(
     taskViewModelFactory: TaskViewModelFactory,
     modifier: Modifier = Modifier
 ) {
+    var userIdentifier by rememberSaveable { mutableStateOf(userId) }
     var activationTime by rememberSaveable { mutableStateOf<Long?>(null) }
     var isDeferred by rememberSaveable { mutableStateOf(false) }
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
@@ -69,6 +70,7 @@ fun AddEditTaskScreen(
                 isPriority = it.priority
                 activationTime = it.activationTime
                 isDeferred = it.isDeferred
+                userIdentifier = it.userId
             }
         }
     }
@@ -139,7 +141,7 @@ fun AddEditTaskScreen(
 
             ActionButtons(
                 taskId = taskId,
-                userId = userId,
+                userId = userIdentifier,
                 navController = navController,
                 taskViewModel = taskViewModel,
                 onSaveTask = {
@@ -153,7 +155,7 @@ fun AddEditTaskScreen(
                                     taskId = System.currentTimeMillis().toString(),
                                     title = taskTitle,
                                     description = taskDescription,
-                                    userId = userId,
+                                    userId = userIdentifier,
                                     completed = isCompleted,
                                     dueDate = deadline,
                                     assignedTo = assignedTo,
@@ -170,7 +172,7 @@ fun AddEditTaskScreen(
                                 taskId = taskId,
                                 title = taskTitle,
                                 description = taskDescription,
-                                userId = userId,
+                                userId = userIdentifier,
                                 completed = isCompleted,
                                 dueDate = deadline,
                                 assignedTo = assignedTo,

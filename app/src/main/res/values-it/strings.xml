@@ -32,7 +32,8 @@
     <string name="empty_fields_error">Email e password non possono essere vuoti.</string>
     <string name="login_failed_error">Accesso non riuscito. Per favore riprova.</string>
     <string name="reset_email_sent">Email di reimpostazione della password inviata!</string>
-    <string name="reset_email_failed">Errore nell'invio dell'email di reimpostazione della password: %1$s</string>
+    <string name="reset_email_failed">Errore nell\'invio dell\'email di reimpostazione della password: %1$s</string>
+
     <string name="enter_email_for_reset">Inserisci la tua email</string>
     <string name="dismiss">Chiudi</string>
     <string name="unknown_error">Errore sconosciuto</string>
