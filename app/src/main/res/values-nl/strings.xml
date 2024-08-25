@@ -67,4 +67,6 @@
     <string name="edit_task">Taak bewerken</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">Meldingstoestemming geweigerd</string>
+    <string name="completed_tasks">Voltooide taken: %1$d/%2$d</string>
+
 </resources>

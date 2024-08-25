@@ -67,4 +67,6 @@
     <string name="edit_task">编辑任务</string>
     <string name="date_format">yyyy年MM月dd日</string>
     <string name="notification_permission_rationale">通知权限被拒绝</string>
+    <string name="completed_tasks">已完成的任务: %1$d/%2$d</string>
+
 </resources>

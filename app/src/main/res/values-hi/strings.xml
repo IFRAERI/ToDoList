@@ -67,4 +67,6 @@
     <string name="edit_task">कार्य संपादित करें</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">सूचना अनुमति अस्वीकार की गई</string>
+    <string name="completed_tasks">पूर्ण किए गए कार्य: %1$d/%2$d</string>
+
 </resources>

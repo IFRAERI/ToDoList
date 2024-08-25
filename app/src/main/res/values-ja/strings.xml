@@ -67,4 +67,6 @@
     <string name="edit_task">タスクを編集</string>
     <string name="date_format">yyyy年MM月dd日</string>
     <string name="notification_permission_rationale">通知の許可が拒否されました</string>
+    <string name="completed_tasks">完了したタスク: %1$d/%2$d</string>
+
 </resources>

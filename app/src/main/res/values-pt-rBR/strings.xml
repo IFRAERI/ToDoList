@@ -67,4 +67,6 @@
     <string name="edit_task">Editar Tarefa</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">Permissão de notificação negada</string>
+    <string name="completed_tasks">Tarefas concluídas: %1$d/%2$d</string>
+
 </resources>

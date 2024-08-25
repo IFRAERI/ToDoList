@@ -13,4 +13,7 @@ interface TaskRepository {
     fun assignTaskToUser(taskId: String, assignedTo: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
     fun getDeferredTasks(userId: String, currentTime: Long, onSuccess: (List<Task>) -> Unit, onFailure: (Exception) -> Unit)
     fun activateDeferredTask(taskId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
+       // Метод для получения количества завершённых задач
+    fun getCompletedTaskCount(userId: String, onSuccess: (Int) -> Unit, onFailure: (Exception) -> Unit)
 }

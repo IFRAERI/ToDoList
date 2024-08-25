@@ -66,5 +66,7 @@
     <string name="high_priority">Yüksek Öncelik</string>
     <string name="edit_task">Görevi Düzenle</string>
     <string name="date_format">dd MMMM yyyy</string>
+    <string name="completed_tasks">Tamamlanan görevler: %1$d/%2$d</string>
+
     <string name="notification_permission_rationale">Bildirim izni reddedildi</string>
 </resources>

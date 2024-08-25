@@ -67,4 +67,6 @@
     <string name="edit_task">تحرير المهمة</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">تم رفض إذن الإشعارات</string>
+    <string name="completed_tasks">المهام المكتملة: %2$d/%1$d</string>
+
 </resources>

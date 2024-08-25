@@ -67,4 +67,6 @@
     <string name="edit_task">작업 편집</string>
     <string name="date_format">yyyy년 MM월 dd일</string>
     <string name="notification_permission_rationale">알림 권한이 거부되었습니다</string>
+    <string name="completed_tasks">완료된 작업: %1$d/%2$d</string>
+
 </resources>

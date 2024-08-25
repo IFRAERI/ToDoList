@@ -20,6 +20,10 @@ class TaskViewModel(
     private var allTasks: List<Task> = listOf()
     private val _isAscending = MutableLiveData<Boolean>(true)
     val isAscending: LiveData<Boolean> = _isAscending
+    private val _completedTaskCount = MutableLiveData<Int>()
+    val completedTaskCount: LiveData<Int> = _completedTaskCount
+    private val _totalTaskCount = MutableLiveData<Int>()
+    val totalTaskCount: LiveData<Int> = _totalTaskCount
     private var deferredTaskJob: Job? = null
 
     init {
@@ -59,8 +63,12 @@ class TaskViewModel(
                     allTasks = taskList
                     _tasks.postValue(taskList)
                     savedStateHandle.set("tasks", taskList)
+                    _totalTaskCount.postValue(taskList.size)
+                    fetchCompletedTaskCount()
                 }, onFailure = {
                     _tasks.postValue(emptyList())
+                    _totalTaskCount.postValue(0)
+                    _completedTaskCount.postValue(0)
                 })
             }
         }
@@ -174,16 +182,7 @@ class TaskViewModel(
     }
 
 
-//    fun startDeferredTaskChecker() {
-//        if (deferredTaskJob == null || deferredTaskJob?.isActive == false) {
-//            deferredTaskJob = viewModelScope.launch {
-//                while (true) {
-//                    checkAndActivateDeferredTasks()
-//                    delay(3600000L)
-//                }
-//            }
-//        }
-//    }
+
 
     suspend fun checkAndActivateDeferredTasks() {
         val currentTime = System.currentTimeMillis()
@@ -212,6 +211,19 @@ class TaskViewModel(
             }
         )
     }
+    fun fetchCompletedTaskCount() {
+        val userId = authViewModel.getCurrentUserId()
+        if (userId != null) {
+            viewModelScope.launch {
+                repository.getCompletedTaskCount(userId, onSuccess = { count ->
+                    _completedTaskCount.postValue(count)
+                }, onFailure = {
+                    _completedTaskCount.postValue(0)
+                })
+            }
+        }
+    }
+
 
 
 

@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -22,6 +24,7 @@ import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 @Composable
 fun TaskListScreen(
     navController: NavController,
@@ -30,6 +33,7 @@ fun TaskListScreen(
     authViewModelFactory: AuthViewModelFactory,
     modifier: Modifier = Modifier
 ) {
+
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     val tasks by taskViewModel.tasks.observeAsState(emptyList())
     val isAscending by taskViewModel.isAscending.observeAsState(true)
@@ -39,6 +43,8 @@ fun TaskListScreen(
     val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     val today = dateFormatter.format(Date())
     var searchQuery by remember { mutableStateOf("") }
+    val completedTaskCount by taskViewModel.completedTaskCount.observeAsState(0)
+    val totalTaskCount by taskViewModel.totalTaskCount.observeAsState(0)
 
     val filteredTasks = tasks.filter {
         Log.d("TaskListScreen", "Filtering task: ${it.title}, Archived: ${it.archived}, Deferred: ${it.isDeferred}")
@@ -60,18 +66,17 @@ fun TaskListScreen(
         groupTasks.isNotEmpty()
     }
 
-
     LaunchedEffect(Unit) {
         val currentUserId = authViewModel.getCurrentUserId() ?: userId
         taskViewModel.fetchTasks(currentUserId)
-        //Log.d("TaskListScreen", "Tasks fetched for user: $currentUserId")
     }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 8.dp, end = 8.dp),
+            .padding(start = 0.dp, end = 0.dp),
         topBar = {
+            Text(text = "Testing changes")
             TaskListTopBar(
                 searchQuery = searchQuery,
                 onSearchQueryChange = { newValue -> searchQuery = newValue },
@@ -89,8 +94,24 @@ fun TaskListScreen(
                 onSortOrderChange = { taskViewModel.toggleSortOrder() },
                 onLogoutClick = { showLogoutDialog = true }
             )
-
-
+        },
+        bottomBar = {
+            BottomBarContent(
+                completedTaskCount = completedTaskCount,
+                totalTaskCount = totalTaskCount
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate("addEditTask") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(id = R.string.add_task)
+                )
+            }
         }
     ) { innerPadding ->
         Box(
@@ -101,7 +122,7 @@ fun TaskListScreen(
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(4.dp)
             ) {
                 if (filteredTasks.isEmpty()) {
                     Text(text = stringResource(id = R.string.no_tasks_available))
@@ -119,7 +140,6 @@ fun TaskListScreen(
                                             TaskItem(
                                                 task = task,
                                                 onLongClick = {
-                                                   // Log.d("TaskListScreen", "Navigating to addEditTask with taskId: ${task.taskId}")
                                                     navController.navigate("addEditTask/${task.taskId}")
                                                 },
                                                 navController = navController,
@@ -134,13 +154,6 @@ fun TaskListScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     BannerAdView(modifier = Modifier.fillMaxWidth())
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { navController.navigate("addEditTask") },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text(text = stringResource(id = R.string.add_task))
                 }
             }
         }

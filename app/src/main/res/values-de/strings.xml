@@ -67,4 +67,6 @@
     <string name="edit_task">Aufgabe bearbeiten</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">Benachrichtigungsberechtigung verweigert</string>
+    <string name="completed_tasks">Abgeschlossene Aufgaben: %1$d/%2$d</string>
+
 </resources>

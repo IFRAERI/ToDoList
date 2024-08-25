@@ -65,4 +65,6 @@
     <string name="edit_task">Редактировать задачу</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">Доступ к уведомлениям отклонен</string>
+    <string name="completed_tasks">Завершенные задачи: %1$d/%2$d</string>
+
 </resources>

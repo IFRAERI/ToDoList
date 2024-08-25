@@ -78,9 +78,11 @@ fun AddEditTaskScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 0.dp)
+
             .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.background)
+            .padding(8.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TitleInput(

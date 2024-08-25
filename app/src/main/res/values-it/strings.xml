@@ -68,4 +68,6 @@
     <string name="edit_task">Modifica attività</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">Permesso di notifica negato</string>
+    <string name="completed_tasks">Attività completate: %1$d/%2$d</string>
+
 </resources>

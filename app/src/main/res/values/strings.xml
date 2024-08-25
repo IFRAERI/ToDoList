@@ -67,6 +67,8 @@
     <string name="edit_task">Edit Task</string>
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">notification permission denied</string>
+    <string name="completed_tasks">Completed tasks: %1$d/%2$d</string>
+
 
 
 </resources>
