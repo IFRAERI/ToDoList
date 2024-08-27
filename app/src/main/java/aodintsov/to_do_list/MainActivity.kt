@@ -52,9 +52,10 @@ class MainActivity : ComponentActivity() {
         val firebaseAuth = FirebaseAuth.getInstance()
         val taskRepository = TaskRepositoryImpl(firestore)
         val userRepository = UserRepositoryImpl(firestore)
-        val authViewModelFactory = AuthViewModelFactory(firebaseAuth)
-        val taskViewModelFactory = TaskViewModelFactory(taskRepository, AuthViewModel(firebaseAuth), createSavedStateHandle())
+        val authViewModelFactory = AuthViewModelFactory(firebaseAuth, userRepository)
+
         val userViewModelFactory = UserViewModelFactory(userRepository)
+        val taskViewModelFactory = TaskViewModelFactory(taskRepository, AuthViewModel(firebaseAuth,userRepository), createSavedStateHandle())
 
         setContent {
             ToDoListTheme {
