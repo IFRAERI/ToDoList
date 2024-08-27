@@ -15,6 +15,10 @@ import androidx.navigation.NavController
 import aodintsov.to_do_list.R
 import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
+import kotlinx.coroutines.delay
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -53,7 +57,8 @@ fun LoginScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text(stringResource(R.string.password_label)) },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation() // Скрытие пароля
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -117,6 +122,12 @@ fun LoginScreen(
     }
 
     if (showSnackbar) {
+        LaunchedEffect(snackbarMessage) {
+            showSnackbar = true
+            delay(3000) // Snackbar будет показываться в течение 3 секунд
+            showSnackbar = false
+        }
+
         Snackbar(
             action = {
                 Button(onClick = { showSnackbar = false }) {

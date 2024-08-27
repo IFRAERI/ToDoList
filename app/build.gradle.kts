@@ -13,7 +13,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 4
-        versionName = "1.3"
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,6 +69,9 @@ dependencies {
 
 
 
+
+
+
     // Firebase dependencies
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-auth")
@@ -81,6 +84,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.2.0-alpha06") {
         exclude(group = "com.intellij", module = "annotations")
     }
+    implementation(libs.androidx.media3.common)
 }
 
 // Исключение конфликтующих аннотаций

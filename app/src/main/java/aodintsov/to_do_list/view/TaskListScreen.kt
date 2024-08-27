@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -21,6 +20,7 @@ import aodintsov.to_do_list.viewmodel.AuthViewModel
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModel
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
+import aodintsov.to_do_list.viewmodel.UserViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,7 +31,8 @@ fun TaskListScreen(
     userId: String,
     taskViewModelFactory: TaskViewModelFactory,
     authViewModelFactory: AuthViewModelFactory,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userViewModel: UserViewModel
 ) {
 
     val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)

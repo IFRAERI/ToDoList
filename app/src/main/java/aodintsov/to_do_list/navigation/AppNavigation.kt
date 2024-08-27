@@ -1,5 +1,7 @@
 package aodintsov.to_do_list.navigation
 
+
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -8,17 +10,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import aodintsov.to_do_list.view.*
 import aodintsov.to_do_list.viewmodel.AuthViewModel
+
 import aodintsov.to_do_list.viewmodel.AuthViewModelFactory
 import aodintsov.to_do_list.viewmodel.TaskViewModelFactory
+import aodintsov.to_do_list.viewmodel.UserViewModel
+import aodintsov.to_do_list.viewmodel.UserViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
-
 @Composable
 fun AppNavigation(
     navController: NavHostController,
     taskViewModelFactory: TaskViewModelFactory,
     authViewModelFactory: AuthViewModelFactory,
+    userViewModelFactory: UserViewModelFactory, // Включаем этот параметр
     modifier: Modifier = Modifier,
-    firebaseAuth: FirebaseAuth
+    firebaseAuth: FirebaseAuth,
+    userViewModel: UserViewModel
 ) {
     val authViewModel = viewModel<AuthViewModel>(factory = authViewModelFactory)
     val currentUserId = authViewModel.getCurrentUserId()
@@ -38,6 +44,7 @@ fun AppNavigation(
             RegisterScreen(
                 navController = navController,
                 authViewModelFactory = authViewModelFactory,
+                userViewModelFactory = userViewModelFactory, // Передаем сюда
                 modifier = modifier
             )
         }
@@ -47,6 +54,7 @@ fun AppNavigation(
                 userId = currentUserId ?: "",
                 taskViewModelFactory = taskViewModelFactory,
                 authViewModelFactory = authViewModelFactory,
+                userViewModel = userViewModel,
                 modifier = modifier
             )
         }

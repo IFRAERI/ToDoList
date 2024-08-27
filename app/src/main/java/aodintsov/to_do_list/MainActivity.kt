@@ -21,6 +21,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import aodintsov.to_do_list.model.FirestoreService
 import aodintsov.to_do_list.model.TaskRepositoryImpl
+import aodintsov.to_do_list.model.UserRepositoryImpl
 import aodintsov.to_do_list.navigation.AppNavigation
 import aodintsov.to_do_list.ui.theme.ToDoListTheme
 import aodintsov.to_do_list.utils.AlarmUtils
@@ -49,26 +50,25 @@ class MainActivity : ComponentActivity() {
 
         val firestore = FirestoreService()
         val firebaseAuth = FirebaseAuth.getInstance()
-        val repository = TaskRepositoryImpl(firestore)
-        val authViewModel = AuthViewModel(firebaseAuth)
+        val taskRepository = TaskRepositoryImpl(firestore)
+        val userRepository = UserRepositoryImpl(firestore)
         val authViewModelFactory = AuthViewModelFactory(firebaseAuth)
-        val taskViewModelFactory = TaskViewModelFactory(repository, authViewModel, createSavedStateHandle())
+        val taskViewModelFactory = TaskViewModelFactory(taskRepository, AuthViewModel(firebaseAuth), createSavedStateHandle())
+        val userViewModelFactory = UserViewModelFactory(userRepository)
 
         setContent {
             ToDoListTheme {
                 val navControllerViewModel = rememberNavControllerViewModel()
                 val navController = navControllerViewModel.navController
 
-              //  var showLogoutDialog by remember { mutableStateOf(false) }
                 val snackbarHostState = remember { SnackbarHostState() }
 
                 Content(
                     navController = navController,
                     authViewModelFactory = authViewModelFactory,
                     taskViewModelFactory = taskViewModelFactory,
+                    userViewModelFactory = userViewModelFactory,
                     firebaseAuth = firebaseAuth,
-//                    showLogoutDialog = showLogoutDialog,
-//                    onDismissLogoutDialog = { showLogoutDialog = false },
                     snackbarHostState = snackbarHostState
                 )
 
@@ -103,45 +103,24 @@ class MainActivity : ComponentActivity() {
         authViewModelFactory: AuthViewModelFactory,
         taskViewModelFactory: TaskViewModelFactory,
         firebaseAuth: FirebaseAuth,
-        modifier: Modifier = Modifier,
-//        showLogoutDialog: Boolean,
-//        onDismissLogoutDialog: () -> Unit,
-        snackbarHostState: SnackbarHostState
+        snackbarHostState: SnackbarHostState,
+        userViewModelFactory: UserViewModelFactory, // Обязательно включаем этот параметр
+        modifier: Modifier = Modifier
     ) {
+        val userViewModel: UserViewModel = viewModel(factory = userViewModelFactory)
         AppNavigation(
             navController = navController,
             taskViewModelFactory = taskViewModelFactory,
             authViewModelFactory = authViewModelFactory,
             firebaseAuth = firebaseAuth,
-            modifier = modifier
+            modifier = modifier,
+            userViewModel = userViewModel,
+            userViewModelFactory = userViewModelFactory // Передаем userViewModelFactory в AppNavigation
         )
-
-//        if (showLogoutDialog) {
-//            AlertDialog(
-//                onDismissRequest = onDismissLogoutDialog,
-//                title = { Text("Confirm Logout") },
-//                text = { Text("Are you sure you want to logout?") },
-//                confirmButton = {
-//                    Button(onClick = {
-//                        firebaseAuth.signOut()
-//                        navController.navigate("login") {
-//                            popUpTo("taskList") { inclusive = true }
-//                        }
-//                        onDismissLogoutDialog()
-//                    }) {
-//                        Text("Logout")
-//                    }
-//                },
-//                dismissButton = {
-//                    Button(onClick = onDismissLogoutDialog) {
-//                        Text("Cancel")
-//                    }
-//                }
-//            )
-//        }
 
         SnackbarHost(hostState = snackbarHostState)
     }
+
 
     private fun startDeferredTaskChecker(taskViewModelFactory: TaskViewModelFactory) {
         mainActivityScope.launch {
@@ -186,7 +165,6 @@ class MainActivity : ComponentActivity() {
                     AlarmUtils.setDailyReminder(this)
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-
                     showSnackbar(R.string.notification_permission_rationale)
                 }
                 else -> {

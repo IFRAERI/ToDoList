@@ -68,7 +68,10 @@
     <string name="date_format">dd MMMM yyyy</string>
     <string name="notification_permission_rationale">notification permission denied</string>
     <string name="completed_tasks">Completed tasks: %1$d/%2$d</string>
-
+    <string name="password_mismatch_error">password mismatch error</string>
+    <string name="user_creation_failed_error">user create failed error</string>
+    <string name="confirm_password_label">confirm password</string>
+    <string name="already_have_account">alredy have account</string>
 
 
 </resources>
