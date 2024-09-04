@@ -12,7 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 //import androidx.compose.runtime.setValue
 //import androidx.compose.ui.platform.LocalContext
-import aodintsov.to_do_list.model.Task
+import aodintsov.to_do_list.data.model.Task
 //import aodintsov.to_do_list.R
 
 data class TaskItemState(

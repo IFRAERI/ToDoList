@@ -8,8 +8,8 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import aodintsov.to_do_list.model.FirestoreService
-import aodintsov.to_do_list.model.TaskRepositoryImpl
+import aodintsov.to_do_list.data.model.FirestoreService
+import aodintsov.to_do_list.data.repositoryimpl.TaskRepositoryImpl
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -1,0 +1,9 @@
+<ad-services-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <service-config>
+        <content-rating>general</content-rating>
+        <ad-unit-ids>
+            <ad-unit-id>ca-app-pub-9269847746366709/1196142226</ad-unit-id> <!-- Banner Ad Unit ID -->
+            <ad-unit-id>ca-app-pub-9269847746366709/9981699628</ad-unit-id> <!-- Interstitial Ad Unit ID -->
+        </ad-unit-ids>
+    </service-config>
+</ad-services-config>
