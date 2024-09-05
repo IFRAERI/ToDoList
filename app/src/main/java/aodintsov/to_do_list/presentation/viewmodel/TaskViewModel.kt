@@ -5,17 +5,37 @@ import androidx.lifecycle.*
 import aodintsov.to_do_list.data.model.SubTask
 import aodintsov.to_do_list.data.model.Task
 import aodintsov.to_do_list.domain.repository.TaskRepository
+import aodintsov.to_do_list.domain.usecase.task.ActivateDeferredTaskUseCase
 //import dagger.assisted.Assisted
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 //import kotlinx.coroutines.launch
 import javax.inject.Inject
+import aodintsov.to_do_list.domain.usecase.task.AddTaskUseCase
+import aodintsov.to_do_list.domain.usecase.task.CheckAndActivateDeferredTasksUseCase
+import aodintsov.to_do_list.domain.usecase.task.DeleteTaskUseCase
+import aodintsov.to_do_list.domain.usecase.task.FetchCompletedTaskCountUseCase
+import aodintsov.to_do_list.domain.usecase.task.FetchDeferredTasksUseCase
+import aodintsov.to_do_list.domain.usecase.task.FetchTasksUseCase
+import aodintsov.to_do_list.domain.usecase.task.SearchTasksUseCase
+import aodintsov.to_do_list.domain.usecase.task.UpdateSubTaskUseCase
+import aodintsov.to_do_list.domain.usecase.task.UpdateTaskUseCase
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val repository: TaskRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val fetchTasksUseCase: FetchTasksUseCase,
+    private val addTaskUseCase: AddTaskUseCase,
+    private val searchTasksUseCase: SearchTasksUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val updateSubTaskUseCase: UpdateSubTaskUseCase,
+    private val fetchDeferredTasksUseCase: FetchDeferredTasksUseCase,
+    private val activateDeferredTaskUseCase: ActivateDeferredTaskUseCase,
+    private val checkAndActivateDeferredTasksUseCase: CheckAndActivateDeferredTasksUseCase,
+    private val fetchCompletedTaskCountUseCase: FetchCompletedTaskCountUseCase
 ) : ViewModel() {
 
     private val _tasks = MutableLiveData<List<Task>>()
@@ -69,7 +89,7 @@ class TaskViewModel @Inject constructor(
         Log.d("TaskViewModel", "Fetching tasks for user: $userId")
         if (userId.isNotEmpty()) {
             viewModelScope.launch {
-                repository.getTasks(userId, onSuccess = { taskList ->
+                fetchTasksUseCase.execute(userId, onSuccess = { taskList ->
                     allTasks = taskList
                     _tasks.postValue(taskList)
                     _totalTaskCount.postValue(taskList.size)
@@ -86,16 +106,8 @@ class TaskViewModel @Inject constructor(
 
     fun searchTasks(query: String) {
         Log.d("TaskViewModel", "Searching tasks with query: $query")
-        _tasks.postValue(
-            if (query.isEmpty()) {
-                allTasks
-            } else {
-                allTasks.filter { task ->
-                    task.title.contains(query, ignoreCase = true) ||
-                            task.description.contains(query, ignoreCase = true)
-                }
-            }
-        )
+        val result = searchTasksUseCase.execute(query, allTasks)
+        _tasks.postValue(result)
     }
 
     fun toggleSortOrder() {
@@ -117,18 +129,14 @@ class TaskViewModel @Inject constructor(
     }
 
     fun addTask(task: Task) {
-        Log.d("TaskViewModel", "Preparing to add task: ${task.title}")
-        viewModelScope.launch {
-            repository.addTask(task,
-                onSuccess = {
-                    Log.d("TaskViewModel", "Task added successfully")
-                },
-                onFailure = { exception ->
-                    Log.e("TaskViewModel", "Failed to add task", exception)
-                }
-            )
-        }
-        Log.d("TaskViewModel", "Method addTask from repository was called")
+        addTaskUseCase.execute(task,
+            onSuccess = {
+                Log.d("TaskViewModel", "Task added successfully")
+            },
+            onFailure = { exception ->
+                Log.e("TaskViewModel", "Failed to add task", exception)
+            }
+        )
     }
 
 
@@ -136,7 +144,7 @@ class TaskViewModel @Inject constructor(
     fun updateTask(task: Task) {
         Log.d("TaskViewModel", "Updating task: ${task.taskId}")
         viewModelScope.launch {
-            repository.updateTask(
+            updateTaskUseCase.execute(
                 task,
                 onSuccess = {
                     fetchTasks(task.userId)
@@ -155,11 +163,15 @@ class TaskViewModel @Inject constructor(
     fun deleteTask(taskId: String, userId: String) {
         Log.d("TaskViewModel", "Deleting task: $taskId")
         viewModelScope.launch {
-            repository.deleteTask(taskId, onSuccess = {
-                fetchTasks(userId)
-            }, onFailure = {
-                Log.e("TaskViewModel", "Failed to delete task")
-            })
+            deleteTaskUseCase.execute(
+                taskId,
+                onSuccess = {
+                    fetchTasks(userId)
+                },
+                onFailure = {
+                    Log.e("TaskViewModel", "Failed to delete task")
+                }
+            )
         }
     }
 
@@ -170,29 +182,40 @@ class TaskViewModel @Inject constructor(
     fun updateSubTask(taskId: String, subTask: SubTask) {
         Log.d("TaskViewModel", "Updating sub-task for task: $taskId")
         viewModelScope.launch {
-            repository.updateSubTask(taskId, subTask, onSuccess = {
-                val task = getTaskById(taskId)
-                task?.let {
-                    fetchTasks(it.userId)
+            updateSubTaskUseCase.execute(
+                taskId,
+                subTask,
+                onSuccess = {
+                    val task = getTaskById(taskId)
+                    task?.let {
+                        fetchTasks(it.userId)
+                    }
+                },
+                onFailure = {
+                    Log.e("TaskViewModel", "Failed to update sub-task")
                 }
-            }, onFailure = {
-                Log.e("TaskViewModel", "Failed to update sub-task")
-            })
+            )
         }
     }
+
 
     fun fetchDeferredTasks(currentTime: Long) {
         val userId = savedStateHandle.get<String>("userId")
         Log.d("TaskViewModel", "Fetching deferred tasks for user: $userId")
         if (userId != null) {
             viewModelScope.launch {
-                repository.getDeferredTasks(userId, currentTime, onSuccess = { taskList ->
-                    allTasks = taskList
-                    _tasks.postValue(taskList)
-                }, onFailure = {
-                    Log.e("TaskViewModel", "Failed to fetch deferred tasks")
-                    _tasks.postValue(emptyList())
-                })
+                fetchDeferredTasksUseCase.execute(
+                    userId,
+                    currentTime,
+                    onSuccess = { taskList ->
+                        allTasks = taskList
+                        _tasks.postValue(taskList)
+                    },
+                    onFailure = {
+                        Log.e("TaskViewModel", "Failed to fetch deferred tasks")
+                        _tasks.postValue(emptyList())
+                    }
+                )
             }
         }
     }
@@ -200,46 +223,44 @@ class TaskViewModel @Inject constructor(
     fun activateDeferredTask(taskId: String) {
         Log.d("TaskViewModel", "Activating deferred task: $taskId")
         viewModelScope.launch {
-            repository.activateDeferredTask(taskId, onSuccess = {
-                fetchTasks(savedStateHandle.get<String>("userId") ?: "")
-            }, onFailure = { exception ->
-                Log.e("TaskViewModel", "Failed to activate deferred task: $taskId")
-            })
+            activateDeferredTaskUseCase.execute(
+                taskId,
+                onSuccess = {
+                    fetchTasks(savedStateHandle.get<String>("userId") ?: "")
+                },
+                onFailure = { exception ->
+                    Log.e("TaskViewModel", "Failed to activate deferred task: $taskId", exception)
+                }
+            )
         }
     }
 
     suspend fun checkAndActivateDeferredTasks() {
         val currentTime = System.currentTimeMillis()
         Log.d("TaskViewModel", "Checking and activating deferred tasks")
-        repository.getDeferredTasks(
-            userId = savedStateHandle.get<String>("userId") ?: "",
+        val userId = savedStateHandle.get<String>("userId") ?: return
+
+        checkAndActivateDeferredTasksUseCase.execute(
+            userId = userId,
             currentTime = currentTime,
-            onSuccess = { deferredTasks ->
-                deferredTasks.forEach { task ->
-                    val activationTime = task.activationTime
-                    if (activationTime != null && activationTime <= currentTime) {
-                        activateDeferredTask(task.taskId)
-                    }
-                }
-            },
             onFailure = { exception ->
-                Log.e("TaskViewModel", "Failed to check and activate deferred tasks")
+                Log.e("TaskViewModel", "Failed to check and activate deferred tasks", exception)
             }
         )
     }
 
     fun fetchCompletedTaskCount(userId: String) {
         Log.d("TaskViewModel", "Fetching completed task count for user: $userId")
-        if (userId.isNotEmpty()) {
-            viewModelScope.launch {
-                repository.getCompletedTaskCount(userId, onSuccess = { count ->
-                    _completedTaskCount.postValue(count)
-                }, onFailure = {
-                    Log.e("TaskViewModel", "Failed to fetch completed task count")
-                    _completedTaskCount.postValue(0)
-                })
+        fetchCompletedTaskCountUseCase.execute(
+            userId = userId,
+            onSuccess = { count ->
+                _completedTaskCount.postValue(count)
+            },
+            onFailure = {
+                Log.e("TaskViewModel", "Failed to fetch completed task count")
+                _completedTaskCount.postValue(0)
             }
-        }
+        )
     }
 
     override fun onCleared() {

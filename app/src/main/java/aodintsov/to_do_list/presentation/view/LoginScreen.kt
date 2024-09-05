@@ -71,7 +71,7 @@ fun LoginScreen(
                     snackbarMessage = emptyFieldsError
                     showSnackbar = true
                 } else {
-                    authViewModel.login(email, password) { success ->
+                    authViewModel.login(email, password) { success, exception ->
                         if (success) {
                             navController.navigate("taskList") {
                                 popUpTo("login") { inclusive = true }

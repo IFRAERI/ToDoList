@@ -21,17 +21,18 @@ class AuthViewModel @Inject constructor(
         return loginUseCase.getCurrentUserId()
     }
 
-    fun login(email: String, password: String, onComplete: (Boolean) -> Unit) {
-        loginUseCase.execute(email, password) { success ->
+    fun login(email: String, password: String, onComplete: (Boolean, Exception?) -> Unit) {
+        loginUseCase.execute(email, password) { success, exception ->
             if (success) {
                 Log.d("AuthViewModel", "Login successful for email: $email")
-                onComplete(true)
+                onComplete(true, null)
             } else {
-                Log.e("AuthViewModel", "Login failed for email: $email")
-                onComplete(false)
+                Log.e("AuthViewModel", "Login failed for email: $email", exception)
+                onComplete(false, exception)
             }
         }
     }
+
 
     fun register(email: String, password: String, onComplete: (Boolean, Exception?) -> Unit) {
         registerUserUseCase.execute(email, password) { success, exception ->

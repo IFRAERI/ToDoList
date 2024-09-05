@@ -24,7 +24,13 @@ fun AppNavigation(
     val authViewModel: AuthViewModel = hiltViewModel()
     val taskViewModel: TaskViewModel = hiltViewModel()
 
+    // Получаем текущий userId
     val currentUserId = authViewModel.getCurrentUserId()
+
+    if (currentUserId.isNullOrBlank()) {
+        // Если userId пустой, вызываем getUser из UserViewModel
+        userViewModel.getUser(currentUserId ?: "")
+    }
 
     NavHost(
         navController = navController,

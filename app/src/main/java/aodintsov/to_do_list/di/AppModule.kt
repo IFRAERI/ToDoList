@@ -94,9 +94,9 @@ object AppModule {
     @Singleton
     fun provideRegisterUserUseCase(
         firebaseAuth: FirebaseAuth,
-        userRepository: UserRepository
+        createUserInFirestoreUseCase: CreateUserInFirestoreUseCase // Правильный use-case
     ): RegisterUserUseCase {
         Log.d("HiltLog", "RegisterUserUseCase instance created")
-        return RegisterUserUseCase(firebaseAuth, userRepository)
+        return RegisterUserUseCase(firebaseAuth, createUserInFirestoreUseCase)
     }
 }
