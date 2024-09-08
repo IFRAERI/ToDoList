@@ -1,5 +1,6 @@
 package aodintsov.to_do_list.view
 
+import android.util.Log
 import aodintsov.to_do_list.view.components.TitleInput
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -37,10 +38,13 @@ fun AddEditTaskScreen(
     var userIdentifier by rememberSaveable { mutableStateOf(userId) }
     var activationTime by rememberSaveable { mutableStateOf<Long?>(null) }
     var isDeferred by rememberSaveable { mutableStateOf(false) }
-  //  val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
+    //  val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     var taskTitle by rememberSaveable { mutableStateOf("") }
     var taskDescription by rememberSaveable { mutableStateOf("") }
-    var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
+    val subTasks by taskViewModel.subTasks.observeAsState(emptyList())
+
+
+    //var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
     var isPriority by rememberSaveable { mutableStateOf(false) }
     var isCompleted by rememberSaveable { mutableStateOf(false) }
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -67,11 +71,13 @@ fun AddEditTaskScreen(
                 isCompleted = it.completed
                 deadline = it.dueDate
                 assignedTo = it.assignedTo
-                subTasks = it.subTasks
                 isPriority = it.priority
                 activationTime = it.activationTime
                 isDeferred = it.isDeferred
                 userIdentifier = it.userId
+
+                // Обновляем подзадачи через метод ViewModel
+                taskViewModel.updateSubTasks(it.subTasks)
             }
         }
     }
@@ -128,17 +134,29 @@ fun AddEditTaskScreen(
                 }
             )
 
+
             SubTasksSection(
                 subTasks = subTasks,
                 onAddSubTask = {
-                    subTasks = subTasks + SubTask(
+                    val newSubTask = SubTask(
                         subTaskId = System.currentTimeMillis().toString(),
                         title = "",
                         completed = false
                     )
+                    // Вызываем метод ViewModel для обновления списка подзадач
+                    taskViewModel.updateSubTasks(subTasks + newSubTask)
                 },
                 onSubTasksChange = { updatedSubTasks ->
-                    subTasks = updatedSubTasks
+                    // Вызываем метод ViewModel для обновления подзадач
+                    taskViewModel.updateSubTasks(updatedSubTasks)
+                },
+                onGenerateSubTasks = {
+                    if (taskDescription.isNotBlank()) {
+                        taskViewModel.fetchSubTasksForTask(taskDescription)
+                        Log.d("AIButton", "Нажата кнопка AI, отправка запроса к API...")
+                    } else {
+                        Toast.makeText(context, emptyFieldsError, Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
 
@@ -151,8 +169,10 @@ fun AddEditTaskScreen(
                     if (taskTitle.isBlank() || taskDescription.isBlank()) {
                         Toast.makeText(context, emptyFieldsError, Toast.LENGTH_SHORT).show()
                     } else {
-                        subTasks = subTasks.filter { it.title.isNotBlank() }
+                        // Фильтруем подзадачи, оставляя только те, у которых не пустое название
+                        val filteredSubTasks = subTasks.filter { it.title.isNotBlank() }
                         if (taskId == null) {
+                            // Добавляем новую задачу с подзадачами через ViewModel
                             taskViewModel.addTask(
                                 Task(
                                     taskId = System.currentTimeMillis().toString(),
@@ -162,7 +182,7 @@ fun AddEditTaskScreen(
                                     completed = isCompleted,
                                     dueDate = deadline,
                                     assignedTo = assignedTo,
-                                    subTasks = subTasks,
+                                    subTasks = filteredSubTasks,  // Используем отфильтрованные подзадачи
                                     priority = isPriority,
                                     activationTime = activationTime,
                                     isDeferred = isDeferred,
@@ -171,6 +191,7 @@ fun AddEditTaskScreen(
                                 )
                             )
                         } else {
+                            // Обновляем существующую задачу с подзадачами через ViewModel
                             val updatedTask = Task(
                                 taskId = taskId,
                                 title = taskTitle,
@@ -179,7 +200,7 @@ fun AddEditTaskScreen(
                                 completed = isCompleted,
                                 dueDate = deadline,
                                 assignedTo = assignedTo,
-                                subTasks = subTasks,
+                                subTasks = filteredSubTasks,  // Используем отфильтрованные подзадачи
                                 activationTime = activationTime,
                                 isDeferred = isDeferred,
                                 priority = isPriority,
@@ -191,6 +212,7 @@ fun AddEditTaskScreen(
                     }
                 }
             )
+
 
             if (showDeleteDialog) {
                 AlertDialog(

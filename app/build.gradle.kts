@@ -78,6 +78,9 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:0.31.3-beta")
     implementation("androidx.compose.material:material:1.6.8")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.8")
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+
 
     // Hilt dependencies
     implementation("com.google.dagger:hilt-android:2.52")

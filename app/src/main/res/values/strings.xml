@@ -72,6 +72,7 @@
     <string name="user_creation_failed_error">user create failed error</string>
     <string name="confirm_password_label">confirm password</string>
     <string name="already_have_account">alredy have account</string>
+    <string name="generate_subtasks">AI</string>
 
 
 </resources>

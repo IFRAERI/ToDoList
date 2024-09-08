@@ -2,9 +2,12 @@ package aodintsov.to_do_list.presentation.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
+import aodintsov.to_do_list.data.model.Message
+import aodintsov.to_do_list.data.model.OpenAIRequest
 import aodintsov.to_do_list.data.model.SubTask
 import aodintsov.to_do_list.data.model.Task
 import aodintsov.to_do_list.domain.repository.TaskRepository
+import aodintsov.to_do_list.domain.usecase.api.GetSubTasksUseCase
 import aodintsov.to_do_list.domain.usecase.task.ActivateDeferredTaskUseCase
 //import dagger.assisted.Assisted
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +27,7 @@ import aodintsov.to_do_list.domain.usecase.task.UpdateTaskUseCase
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
-    private val repository: TaskRepository,
+   // private val repository: TaskRepository,
     private val savedStateHandle: SavedStateHandle,
     private val fetchTasksUseCase: FetchTasksUseCase,
     private val addTaskUseCase: AddTaskUseCase,
@@ -35,12 +38,17 @@ class TaskViewModel @Inject constructor(
     private val fetchDeferredTasksUseCase: FetchDeferredTasksUseCase,
     private val activateDeferredTaskUseCase: ActivateDeferredTaskUseCase,
     private val checkAndActivateDeferredTasksUseCase: CheckAndActivateDeferredTasksUseCase,
+    private val getSubTasksUseCase: GetSubTasksUseCase,
     private val fetchCompletedTaskCountUseCase: FetchCompletedTaskCountUseCase
 ) : ViewModel() {
 
     private val _tasks = MutableLiveData<List<Task>>()
     val tasks: LiveData<List<Task>> = _tasks
     private var allTasks: List<Task> = listOf()
+
+    private val _subTasks = MutableLiveData<List<SubTask>>()
+    val subTasks: LiveData<List<SubTask>> get() = _subTasks
+
 
     private val _isAscending = MutableLiveData(true)
     val isAscending: LiveData<Boolean> = _isAscending
@@ -140,7 +148,6 @@ class TaskViewModel @Inject constructor(
     }
 
 
-
     fun updateTask(task: Task) {
         Log.d("TaskViewModel", "Updating task: ${task.taskId}")
         viewModelScope.launch {
@@ -156,8 +163,6 @@ class TaskViewModel @Inject constructor(
             )
         }
     }
-
-
 
 
     fun deleteTask(taskId: String, userId: String) {
@@ -267,5 +272,64 @@ class TaskViewModel @Inject constructor(
         super.onCleared()
         deferredTaskJob?.cancel()
         Log.d("TaskViewModel", "ViewModel cleared")
+    }
+
+    fun fetchSubTasksForTask(taskDescription: String) {
+        Log.d(
+            "fetchSubTasks",
+            "Запущен метод fetchSubTasksForTask с описанием задачи: $taskDescription"
+        )
+        viewModelScope.launch {
+            // Создаем запрос с настройками
+            val request = OpenAIRequest(
+                model = "gpt-3.5-turbo", // Модель GPT
+                messages = listOf(
+                    Message(
+                        role = "user", // Роль пользователя
+                        content = "Сформируй 10 подзадач для выполнения следующей задачи: $taskDescription. " +
+                                "Каждый шаг должен быть не длиннее 100 символов."
+                    )
+                ),
+                max_tokens = 500, // Максимальное количество токенов для ответа
+                temperature = 0.7f // Температура генерации для вариации ответов
+            )
+
+            Log.d("fetchSubTasks", "Отправка запроса к API с запросом: $request")
+
+            val result = getSubTasksUseCase(request)
+
+            result.fold(
+                onSuccess = { response ->
+                    Log.d(
+                        "fetchSubTasks",
+                        "Успешный ответ от API: ${response.choices.firstOrNull()?.message?.content}"
+                    )
+
+                    // Разбираем ответ и формируем список подзадач
+                    val generatedSubTasks = response.choices.firstOrNull()?.message?.content
+                        ?.split("\n") // Разделяем строки на подзадачи
+                        ?.mapIndexed { index, step ->
+                            SubTask(
+                                subTaskId = System.currentTimeMillis().toString() + index,
+                                title = step.trim(),  // Убираем лишние пробелы
+                                completed = false
+                            )
+                        } ?: listOf()
+
+                    Log.d("fetchSubTasks", "Сгенерированные подзадачи: $generatedSubTasks")
+
+                    // Обновляем список подзадач в ViewModel
+                    _subTasks.postValue(generatedSubTasks)
+                },
+                onFailure = { error ->
+                    Log.e("fetchSubTasks", "Ошибка при получении подзадач: ${error.message}")
+                    // Можно также показать сообщение пользователю, если это необходимо
+                }
+            )
+        }
+    }
+
+    fun updateSubTasks(updatedSubTasks: List<SubTask>) {
+        _subTasks.value = updatedSubTasks
     }
 }

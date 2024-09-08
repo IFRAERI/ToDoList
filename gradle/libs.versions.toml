@@ -4,6 +4,7 @@ agp = "8.4.1"
 androidxComposeBom = "2024.06.00"
 androidxJunit = "1.2.1"
 composeBomVersion = "2023.05.01"
+converterGson = "2.9.0"
 espressoCoreVersion = "3.6.1"
 firebaseAds = "23.2.0"
 firebaseBom = "33.1.2"
@@ -24,6 +25,7 @@ materialIconsExtended = "1.6.8"
 navigationComposeVersion = "2.7.1"
 playServicesAds = "23.2.0"
 playServicesAuth = "21.2.0"
+retrofit = "2.9.0"
 runtimeLivedata = "1.6.8"
 navigationRuntimeKtx = "2.7.7"
 navigationCompose = "2.7.7"
@@ -51,6 +53,7 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-navigation-compose-v271 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-runtime-livedata-v151 = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedataVersion" }
 androidx-ui-tooling-v151 = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiToolingVersion" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-ads = { module = "com.google.firebase:firebase-ads", version.ref = "firebaseAds" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -78,6 +81,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "uiGraphics" }
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }

@@ -15,6 +15,11 @@
 local.properties
 app/google-services.json
 app/src/main/java/aodintsov/to_do_list/AdConfig.kt
-app/src/main/java/aodintsov/to_do_list/model/TaskRepositoryImpl.kt
+# Secrets and API keys
+app/src/main/res/values/secrets.xml
+
+# Additional sensitive files
+app/src/main/res/values/api_keys.xml
+
 
 

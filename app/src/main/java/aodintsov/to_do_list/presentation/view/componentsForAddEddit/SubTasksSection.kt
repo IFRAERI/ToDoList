@@ -1,5 +1,6 @@
 package aodintsov.to_do_list.view.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +25,8 @@ fun SubTasksSection(
     subTasks: List<SubTask>,
     onSubTasksChange: (List<SubTask>) -> Unit,
     modifier: Modifier = Modifier,
-    onAddSubTask: () -> Unit
+    onAddSubTask: () -> Unit,
+    onGenerateSubTasks: () -> Unit
 ) {
     val maxLength = 100
 
@@ -81,15 +83,30 @@ fun SubTasksSection(
             }
         }
 
-        Button(onClick = {
-            val newSubTask = SubTask(
-                subTaskId = System.currentTimeMillis().toString(),
-                title = "",
-                completed = false
-            )
-            onSubTasksChange(subTasks + newSubTask)
-        }) {
-            Text(text = stringResource(R.string.add_subtask))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Кнопка добавления подзадачи
+            Button(onClick = {
+                val newSubTask = SubTask(
+                    subTaskId = System.currentTimeMillis().toString(),
+                    title = "",
+                    completed = false
+                )
+                onSubTasksChange(subTasks + newSubTask)
+            }) {
+                Text(text = stringResource(R.string.add_subtask))
+            }
+
+            // Кнопка генерации подзадач
+            Button(onClick = {
+                onGenerateSubTasks()
+            }) {
+                Text(text = stringResource(R.string.generate_subtasks))
+            }
         }
     }
 }
