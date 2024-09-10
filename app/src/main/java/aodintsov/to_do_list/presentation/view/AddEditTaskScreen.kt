@@ -24,6 +24,7 @@ import aodintsov.to_do_list.view.components.*
 import java.util.*
 import aodintsov.to_do_list.data.model.Task
 import android.widget.Toast
+import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
@@ -31,20 +32,16 @@ fun AddEditTaskScreen(
     navController: NavController,
     userId: String,
     taskId: String?,
-    //taskViewModelFactory: TaskViewModelFactory,
     modifier: Modifier = Modifier
 ) {
     val taskViewModel: TaskViewModel = hiltViewModel()
     var userIdentifier by rememberSaveable { mutableStateOf(userId) }
     var activationTime by rememberSaveable { mutableStateOf<Long?>(null) }
     var isDeferred by rememberSaveable { mutableStateOf(false) }
-    //  val taskViewModel: TaskViewModel = viewModel(factory = taskViewModelFactory)
     var taskTitle by rememberSaveable { mutableStateOf("") }
     var taskDescription by rememberSaveable { mutableStateOf("") }
     val subTasks by taskViewModel.subTasks.observeAsState(emptyList())
-
-
-    //var subTasks by rememberSaveable { mutableStateOf(listOf<SubTask>()) }
+    val isLoading by taskViewModel.isLoading.observeAsState(false)
     var isPriority by rememberSaveable { mutableStateOf(false) }
     var isCompleted by rememberSaveable { mutableStateOf(false) }
     var deadline by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -85,13 +82,15 @@ fun AddEditTaskScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 0.dp)
-
+            .padding(horizontal = 16.dp) // Добавляем отступы
             .verticalScroll(rememberScrollState())
+            .imePadding() // Адаптация к появлению клавиатуры
             .background(MaterialTheme.colorScheme.background)
             .padding(8.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
             TitleInput(
                 title = taskTitle,
                 onTitleChange = { taskTitle = it }
@@ -134,7 +133,6 @@ fun AddEditTaskScreen(
                 }
             )
 
-
             SubTasksSection(
                 subTasks = subTasks,
                 onAddSubTask = {
@@ -143,22 +141,18 @@ fun AddEditTaskScreen(
                         title = "",
                         completed = false
                     )
-                    // Вызываем метод ViewModel для обновления списка подзадач
                     taskViewModel.updateSubTasks(subTasks + newSubTask)
                 },
                 onSubTasksChange = { updatedSubTasks ->
-                    // Вызываем метод ViewModel для обновления подзадач
                     taskViewModel.updateSubTasks(updatedSubTasks)
                 },
                 onGenerateSubTasks = {
-                    if (taskDescription.isNotBlank()) {
-                        taskViewModel.fetchSubTasksForTask(taskDescription)
-                        Log.d("AIButton", "Нажата кнопка AI, отправка запроса к API...")
-                    } else {
-                        Toast.makeText(context, emptyFieldsError, Toast.LENGTH_SHORT).show()
-                    }
-                }
+                    taskViewModel.fetchSubTasksForTask(taskDescription)
+                },
+                isLoading = isLoading
             )
+
+            Spacer(modifier = Modifier.height(16.dp)) // Добавляем отступ перед кнопкой
 
             ActionButtons(
                 taskId = taskId,
@@ -169,10 +163,8 @@ fun AddEditTaskScreen(
                     if (taskTitle.isBlank() || taskDescription.isBlank()) {
                         Toast.makeText(context, emptyFieldsError, Toast.LENGTH_SHORT).show()
                     } else {
-                        // Фильтруем подзадачи, оставляя только те, у которых не пустое название
                         val filteredSubTasks = subTasks.filter { it.title.isNotBlank() }
                         if (taskId == null) {
-                            // Добавляем новую задачу с подзадачами через ViewModel
                             taskViewModel.addTask(
                                 Task(
                                     taskId = System.currentTimeMillis().toString(),
@@ -182,7 +174,7 @@ fun AddEditTaskScreen(
                                     completed = isCompleted,
                                     dueDate = deadline,
                                     assignedTo = assignedTo,
-                                    subTasks = filteredSubTasks,  // Используем отфильтрованные подзадачи
+                                    subTasks = filteredSubTasks,
                                     priority = isPriority,
                                     activationTime = activationTime,
                                     isDeferred = isDeferred,
@@ -191,7 +183,6 @@ fun AddEditTaskScreen(
                                 )
                             )
                         } else {
-                            // Обновляем существующую задачу с подзадачами через ViewModel
                             val updatedTask = Task(
                                 taskId = taskId,
                                 title = taskTitle,
@@ -200,7 +191,7 @@ fun AddEditTaskScreen(
                                 completed = isCompleted,
                                 dueDate = deadline,
                                 assignedTo = assignedTo,
-                                subTasks = filteredSubTasks,  // Используем отфильтрованные подзадачи
+                                subTasks = filteredSubTasks,
                                 activationTime = activationTime,
                                 isDeferred = isDeferred,
                                 priority = isPriority,
@@ -212,31 +203,30 @@ fun AddEditTaskScreen(
                     }
                 }
             )
-
-
-            if (showDeleteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    title = { Text(text = stringResource(R.string.confirm_delete_title)) },
-                    text = { Text(text = stringResource(R.string.confirm_delete_message)) },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                taskViewModel.deleteTask(taskId!!, userId)
-                                navController.navigateUp()
-                                showDeleteDialog = false
-                            }
-                        ) {
-                            Text(text = stringResource(R.string.confirm_delete))
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = { showDeleteDialog = false }) {
-                            Text(text = stringResource(R.string.cancel_delete))
-                        }
-                    }
-                )
-            }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(text = stringResource(R.string.confirm_delete_title)) },
+            text = { Text(text = stringResource(R.string.confirm_delete_message)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        taskViewModel.deleteTask(taskId!!, userId)
+                        navController.navigateUp()
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(R.string.confirm_delete))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = false }) {
+                    Text(text = stringResource(R.string.cancel_delete))
+                }
+            }
+        )
     }
 }

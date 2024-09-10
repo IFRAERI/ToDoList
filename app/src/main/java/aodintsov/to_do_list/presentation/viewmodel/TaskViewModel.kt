@@ -59,6 +59,9 @@ class TaskViewModel @Inject constructor(
     private val _totalTaskCount = MutableLiveData<Int>()
     val totalTaskCount: LiveData<Int> = _totalTaskCount
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private var deferredTaskJob: Job? = null
 
     init {
@@ -273,63 +276,81 @@ class TaskViewModel @Inject constructor(
         deferredTaskJob?.cancel()
         Log.d("TaskViewModel", "ViewModel cleared")
     }
+    fun updateSubTasks(updatedSubTasks: List<SubTask>) {
+        _subTasks.postValue(updatedSubTasks) // Обновляем подзадачи в LiveData
+    }
+
+
+
 
     fun fetchSubTasksForTask(taskDescription: String) {
-        Log.d(
-            "fetchSubTasks",
-            "Запущен метод fetchSubTasksForTask с описанием задачи: $taskDescription"
-        )
-        viewModelScope.launch {
-            // Создаем запрос с настройками
-            val request = OpenAIRequest(
-                model = "gpt-3.5-turbo", // Модель GPT
-                messages = listOf(
-                    Message(
-                        role = "user", // Роль пользователя
-                        content = "Сформируй 10 подзадач для выполнения следующей задачи: $taskDescription. " +
-                                "Каждый шаг должен быть не длиннее 100 символов."
-                    )
-                ),
-                max_tokens = 500, // Максимальное количество токенов для ответа
-                temperature = 0.7f // Температура генерации для вариации ответов
+            Log.d(
+                "fetchSubTasks",
+                "Запущен метод fetchSubTasksForTask с описанием задачи: $taskDescription"
             )
 
-            Log.d("fetchSubTasks", "Отправка запроса к API с запросом: $request")
+            // Запускаем корутину в scope ViewModel
+            viewModelScope.launch {
+                try {
+                    // Устанавливаем флаг загрузки
+                    _isLoading.postValue(true)
 
-            val result = getSubTasksUseCase(request)
-
-            result.fold(
-                onSuccess = { response ->
-                    Log.d(
-                        "fetchSubTasks",
-                        "Успешный ответ от API: ${response.choices.firstOrNull()?.message?.content}"
-                    )
-
-                    // Разбираем ответ и формируем список подзадач
-                    val generatedSubTasks = response.choices.firstOrNull()?.message?.content
-                        ?.split("\n") // Разделяем строки на подзадачи
-                        ?.mapIndexed { index, step ->
-                            SubTask(
-                                subTaskId = System.currentTimeMillis().toString() + index,
-                                title = step.trim(),  // Убираем лишние пробелы
-                                completed = false
+                    // Создаем запрос к API
+                    val request = OpenAIRequest(
+                        model = "gpt-3.5-turbo",
+                        messages = listOf(
+                            Message(
+                                role = "user", // Роль пользователя
+                                content = "Сформируй 10 подзадач для выполнения следующей задачи: $taskDescription. " +
+                                        "Каждый шаг должен быть не длиннее 100 символов шаги должны быть по порядку."
                             )
-                        } ?: listOf()
+                        ),
+                        max_tokens = 500,
+                        temperature = 0.7f
+                    )
 
-                    Log.d("fetchSubTasks", "Сгенерированные подзадачи: $generatedSubTasks")
+                    Log.d("fetchSubTasks", "Отправка запроса к API с запросом: $request")
 
-                    // Обновляем список подзадач в ViewModel
-                    _subTasks.postValue(generatedSubTasks)
-                },
-                onFailure = { error ->
-                    Log.e("fetchSubTasks", "Ошибка при получении подзадач: ${error.message}")
-                    // Можно также показать сообщение пользователю, если это необходимо
+                    // Выполняем запрос к OpenAI через use case
+                    val result = getSubTasksUseCase(request)
+
+                    // Обрабатываем результат
+                    result.fold(
+                        onSuccess = { response ->
+                            Log.d(
+                                "fetchSubTasks",
+                                "Успешный ответ от API: ${response.choices.firstOrNull()?.message?.content}"
+                            )
+
+                            // Преобразуем ответ в список подзадач
+                            val generatedSubTasks = response.choices.firstOrNull()?.message?.content
+                                ?.split("\n")
+                                ?.mapIndexed { index, step ->
+                                    SubTask(
+                                        subTaskId = System.currentTimeMillis().toString() + index,
+                                        title = step.trim(),  // Убираем лишние пробелы
+                                        completed = false
+                                    )
+                                } ?: emptyList()
+
+                            Log.d("fetchSubTasks", "Сгенерированные подзадачи: $generatedSubTasks")
+
+                            // Обновляем список подзадач
+                            _subTasks.postValue(generatedSubTasks)
+                        },
+                        onFailure = { error ->
+                            Log.e(
+                                "fetchSubTasks",
+                                "Ошибка при получении подзадач: ${error.message}"
+                            )
+                            // Можно также добавить сообщение об ошибке для пользователя
+                        }
+                    )
+                } finally {
+                    // Отключаем флаг загрузки после завершения
+                    _isLoading.postValue(false)
                 }
-            )
+            }
         }
     }
 
-    fun updateSubTasks(updatedSubTasks: List<SubTask>) {
-        _subTasks.value = updatedSubTasks
-    }
-}
